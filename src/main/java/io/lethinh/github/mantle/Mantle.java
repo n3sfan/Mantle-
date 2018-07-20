@@ -54,7 +54,7 @@ public class Mantle extends JavaPlugin {
 
 				machines.forEach(machine -> machine.tick(Mantle.this));
 			}
-		}.runTaskTimer(this, 20L, 20L);
+		}.runTaskTimerAsynchronously(this, 20L, 20L);
 	}
 
 	public EventLoader getEventLoader() {
