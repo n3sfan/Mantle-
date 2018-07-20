@@ -1,0 +1,71 @@
+package io.lethinh.github.mantle.command;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import io.lethinh.github.mantle.loader.ItemStackLoader;
+
+/**
+ * Created by Le Thinh
+ */
+public class CommandMantleGive implements CommandExecutor {
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (!(sender instanceof Player)) {
+			return false;
+		}
+
+		if (sender.hasPermission("mantle.give")) {
+			sender.sendMessage(ChatColor.RED + "You cannot use this command!");
+			return false;
+		}
+
+		if (!"mantlegive".equals(label) || !"mantlegive".equals(command.getLabel())) {
+			return false;
+		}
+
+		if (args == null || args.length < 1) {
+			sender.sendMessage(ChatColor.RED + "Not enough command arguments!");
+			return false;
+		}
+
+		Player player = (Player) sender;
+		int itemIdx = 0;
+
+		if (StringUtils.isNotBlank(args[0])) {
+			player = Bukkit.getServer().getPlayer(args[0]);
+			itemIdx = 1;
+		}
+
+		if (player == null) {
+			player = (Player) sender;
+			itemIdx = 0;
+		}
+
+		String item = args[itemIdx];
+
+		switch (item.toLowerCase()) {
+		case "wateringcan":
+			player.getInventory().addItem(ItemStackLoader.WATERING_CAN);
+			return true;
+		case "treecutter":
+			player.getInventory().addItem(ItemStackLoader.TREE_CUTTER);
+			return true;
+		case "planter":
+			player.getInventory().addItem(ItemStackLoader.PLANTER);
+			return true;
+		case "bedrockbreaker":
+			player.getInventory().addItem(ItemStackLoader.BEDROCK_BREAKER);
+			return true;
+		default:
+			return true;
+		}
+	}
+
+}
