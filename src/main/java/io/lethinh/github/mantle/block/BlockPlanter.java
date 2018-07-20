@@ -1,6 +1,5 @@
 package io.lethinh.github.mantle.block;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -23,30 +22,28 @@ public class BlockPlanter extends BlockMachine {
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-			Location blockPos = block.getLocation();
-			BlockIterator iterator = new BlockIterator(blockPos, 0, 7);
+		Location blockPos = block.getLocation();
+		BlockIterator iterator = new BlockIterator(blockPos, 0, 7);
 
-			iterator.forEachRemaining(neighborBlock -> {
-				if (!neighborBlock.isEmpty() || neighborBlock.getLocation().equals(blockPos)) {
-					return;
+		iterator.forEachRemaining(neighborBlock -> {
+			if (!neighborBlock.isEmpty() || neighborBlock.getLocation().equals(blockPos)) {
+				return;
+			}
+
+			Dispenser dispenser = (Dispenser) block.getState();
+			Inventory inventory = dispenser.getInventory();
+
+			for (ItemStack content : inventory.getContents()) {
+				Material material = content.getType();
+
+				if (material.equals(Material.CARROT) || material.equals(Material.SEEDS)
+						|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
+						|| material.equals(Material.MELON_SEEDS)) {
+					inventory.remove(content);
+					neighborBlock.setType(material);
 				}
-
-				Dispenser dispenser = (Dispenser) block.getState();
-				Inventory inventory = dispenser.getInventory();
-
-				for (ItemStack content : inventory.getContents()) {
-					Material material = content.getType();
-
-					if (material.equals(Material.CARROT) || material.equals(Material.SEEDS)
-							|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
-							|| material.equals(Material.MELON_SEEDS)) {
-						inventory.remove(content);
-						neighborBlock.setType(material);
-					}
-				}
-			});
-		}, 20L, 20L);
+			}
+		});
 	}
 
 }
