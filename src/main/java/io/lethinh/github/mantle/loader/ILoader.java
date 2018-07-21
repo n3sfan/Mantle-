@@ -11,6 +11,6 @@ public interface ILoader {
 
 	CopyOnWriteArrayList<ILoader> LOADERS = new CopyOnWriteArrayList<>();
 
-	void load(Mantle plugin) throws Throwable;
+	void load(Mantle plugin) throws Exception;
 
 }

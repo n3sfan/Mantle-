@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
-import io.lethinh.github.mantle.loader.ItemStackLoader;
+import io.lethinh.github.mantle.MantleItemStacks;
 
 /**
  * Created by Le Thinh
@@ -28,14 +28,14 @@ public class BedrockBreakEvent implements Listener {
 		World world = player.getWorld();
 		Location blockPos = block.getLocation();
 
-		if (!ItemStackLoader.BEDROCK_BREAKER.equals(stack) || !Material.BEDROCK.equals(block.getType())
+		if (!MantleItemStacks.BEDROCK_BREAKER.equals(stack) || !Material.BEDROCK.equals(block.getType())
 				|| player.getGameMode().equals(GameMode.CREATIVE)) {
 			return;
 		}
 
 		world.playEffect(blockPos, Effect.STEP_SOUND, block.getTypeId());
+		world.dropItemNaturally(blockPos, new ItemStack(Material.BEDROCK));
 		block.setType(Material.AIR);
-		world.dropItem(blockPos, new ItemStack(Material.BEDROCK));
 	}
 
 }

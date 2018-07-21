@@ -3,51 +3,42 @@ package io.lethinh.github.mantle.block;
 import java.util.Collection;
 
 import org.bukkit.Effect;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Dispenser;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
  */
 public class BlockTreeCutter extends BlockMachine {
 
-	public BlockTreeCutter(Block block, Player player, ItemStack heldItem) {
-		super(block, player, heldItem);
+	public BlockTreeCutter(Block block) {
+		super(block, 45, "Tree Cutter");
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		Location blockPos = block.getLocation();
-		BlockIterator iterator = new BlockIterator(blockPos, 0, 7);
+		(subThread = new BukkitRunnable() {
+			@SuppressWarnings("deprecation")
+			@Override
+			public void run() {
+				Collection<Block> surroundings = Utils.getSurroundingBlocks(block, 7, 30, 7, true, null);
 
-		iterator.forEachRemaining(neighborBlock -> {
-			if (neighborBlock.isEmpty() || neighborBlock.isLiquid()
-					|| neighborBlock.getLocation().equals(blockPos)) {
-				return;
+				for (Block surround : surroundings) {
+					Material material = surround.getType();
+
+					if (material.equals(Material.LOG) || material.equals(Material.LOG_2)
+							|| material.equals(Material.LEAVES) || material.equals(Material.LEAVES_2)) {
+						block.getWorld().playEffect(surround.getLocation(), Effect.STEP_SOUND, material.getId());
+						surround.getDrops().forEach(inventory::addItem);
+						surround.setType(Material.AIR);
+					}
+				}
 			}
-
-			Material material = neighborBlock.getType();
-
-			if (material.isBurnable()) {
-				block.getWorld().playEffect(blockPos, Effect.STEP_SOUND, material.getId());
-				neighborBlock.setType(Material.AIR);
-
-				Dispenser dispenser = (Dispenser) block.getState();
-				Collection<ItemStack> unsignedDrops = neighborBlock.getDrops();
-				ItemStack[] drops = new ItemStack[unsignedDrops.size()];
-				unsignedDrops.toArray(drops);
-
-				dispenser.getInventory().addItem(drops);
-			}
-		});
+		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
 	}
 
 }

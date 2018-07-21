@@ -7,8 +7,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-import io.lethinh.github.mantle.loader.ItemStackLoader;
+import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.MantleItemStacks;
 
 /**
  * Created by Le Thinh
@@ -21,10 +23,10 @@ public class CommandMantleGive implements CommandExecutor {
 			return false;
 		}
 
-		if (sender.hasPermission("mantle.give")) {
-			sender.sendMessage(ChatColor.RED + "You cannot use this command!");
-			return false;
-		}
+//		if (sender.hasPermission("mantle.give")) {
+//			sender.sendMessage(ChatColor.RED + "You cannot use this command!");
+//			return false;
+//		}
 
 		if (!"mantlegive".equals(label) || !"mantlegive".equals(command.getLabel())) {
 			return false;
@@ -50,22 +52,16 @@ public class CommandMantleGive implements CommandExecutor {
 
 		String item = args[itemIdx];
 
-		switch (item.toLowerCase()) {
-		case "wateringcan":
-			player.getInventory().addItem(ItemStackLoader.WATERING_CAN);
-			return true;
-		case "treecutter":
-			player.getInventory().addItem(ItemStackLoader.TREE_CUTTER);
-			return true;
-		case "planter":
-			player.getInventory().addItem(ItemStackLoader.PLANTER);
-			return true;
-		case "bedrockbreaker":
-			player.getInventory().addItem(ItemStackLoader.BEDROCK_BREAKER);
-			return true;
-		default:
-			return true;
+		for (ItemStack stack : MantleItemStacks.STACKS) {
+			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID, "");
+
+			if (name.equalsIgnoreCase(item)) {
+				player.getInventory().addItem(stack);
+				return true;
+			}
 		}
+
+		return true;
 	}
 
 }
