@@ -1,8 +1,9 @@
 package io.lethinh.github.mantle.event;
 
+import java.util.Collection;
+
 import org.bukkit.CropState;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -13,9 +14,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
 
-import io.lethinh.github.mantle.loader.ItemStackLoader;
+import io.lethinh.github.mantle.MantleItemStacks;
+import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
@@ -32,45 +33,37 @@ public class WateringCanEvent implements Listener {
 			return;
 		}
 
-		if (!ItemStackLoader.WATERING_CAN.isSimilar(heldItem)) {
+		if (!Utils.areStacksEqualIgnoreDurability(MantleItemStacks.WATERING_CAN, heldItem)) {
 			return;
 		}
 
-		event.setCancelled(true);
-
 		Block block = event.getClickedBlock();
-		Location blockPos = block.getLocation();
 		Material material = block.getType();
 		World world = block.getWorld();
 
-		if (checkMaterial(material)) {
-			BlockIterator iterator = new BlockIterator(blockPos, 0, 3);
-			int[] growthMask = new int[] { 0 }; // Not thread-safe
+		if (Utils.isGrowable(material) || Material.SAPLING.equals(material)) {
+			int growthMask = 0;
+			Collection<Block> surroundings = Utils.getSurroundingBlocks(block, 1, false);
 
-			iterator.forEachRemaining(neighbor -> {
-				if (neighbor.isEmpty() || !checkMaterial(material) || neighbor.getData() == CropState.RIPE.getData()) {
-					return;
+			for (Block surrounding : surroundings) {
+				if (surrounding.isEmpty() || !Utils.isGrowable(material)
+						|| surrounding.getData() == CropState.RIPE.getData()) {
+					continue;
 				}
 
-				if ((growthMask[0] & 1 << neighbor.getData()) == 0) {
-					neighbor.setData((byte) (neighbor.getData() + 1));
-					growthMask[0] |= 1 << neighbor.getData();
-					world.spawnParticle(Particle.WATER_DROP, blockPos, 10, 3, 3, 3);
+				if ((growthMask & 1 << surrounding.getData()) == 0) {
+					surrounding.setData((byte) (surrounding.getData() + 1));
+					growthMask |= 1 << surrounding.getData();
+					world.spawnParticle(Particle.WATER_DROP, surrounding.getLocation(), 30, 3, 3, 3);
 
 					if (!player.getGameMode().equals(GameMode.CREATIVE)) {
 						heldItem.setDurability((short) (heldItem.getDurability() - 1));
 					}
 				} else {
-					growthMask[0] &= ~(1 << neighbor.getData());
+					growthMask &= ~(1 << surrounding.getData());
 				}
-			});
+			}
 		}
-	}
-
-	private boolean checkMaterial(Material material) {
-		return material.equals(Material.SOIL) || material.equals(Material.CROPS) || material.equals(Material.SEEDS)
-				|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
-				|| material.equals(Material.PUMPKIN_SEEDS);
 	}
 
 }

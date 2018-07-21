@@ -1,49 +1,58 @@
 package io.lethinh.github.mantle.block;
 
+import java.util.Collection;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Dispenser;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
  */
 public class BlockPlanter extends BlockMachine {
 
-	public BlockPlanter(Block block, Player player, ItemStack heldItem) {
-		super(block, player, heldItem);
+	public BlockPlanter(Block block) {
+		super(block, 9, "Planter");
 	}
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		Location blockPos = block.getLocation();
-		BlockIterator iterator = new BlockIterator(blockPos, 0, 7);
+		(subThread = new BukkitRunnable() {
+			@Override
+			public void run() {
+				Location blockPos = block.getLocation();
+				Collection<Block> surroundings = Utils.getSurroundingBlocks(block, 3, true);
 
-		iterator.forEachRemaining(neighborBlock -> {
-			if (!neighborBlock.isEmpty() || neighborBlock.getLocation().equals(blockPos)) {
-				return;
-			}
+				for (Block surround : surroundings) {
+					if (!surround.isEmpty() || surround.getLocation().equals(blockPos)) {
+						continue;
+					}
 
-			Dispenser dispenser = (Dispenser) block.getState();
-			Inventory inventory = dispenser.getInventory();
+					ItemStack content = inventory.getItem(0);
 
-			for (ItemStack content : inventory.getContents()) {
-				Material material = content.getType();
+					if (content == null || content.getAmount() == 0) {
+						continue;
+					}
 
-				if (material.equals(Material.CARROT) || material.equals(Material.SEEDS)
-						|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
-						|| material.equals(Material.MELON_SEEDS)) {
-					inventory.remove(content);
-					neighborBlock.setType(material);
+					Material material = content.getType();
+
+					if (material.equals(Material.CARROT) || material.equals(Material.SEEDS)
+							|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
+							|| material.equals(Material.MELON_SEEDS)) {
+						surround.setType(material);
+						inventory.remove(content);
+					}
+
+					content.setAmount(content.getAmount() - 1);
+					inventory.setItem(0, content);
 				}
 			}
-		});
+		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
 	}
 
 }

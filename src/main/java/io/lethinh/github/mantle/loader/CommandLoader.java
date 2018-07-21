@@ -1,5 +1,7 @@
 package io.lethinh.github.mantle.loader;
 
+import java.util.logging.Logger;
+
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.command.CommandMantleGive;
 
@@ -13,8 +15,13 @@ public class CommandLoader implements ILoader {
 	}
 
 	@Override
-	public void load(Mantle plugin) throws Throwable {
+	public void load(Mantle plugin) throws Exception {
+		Logger logger = plugin.getLogger();
+		logger.info("Registering commands...");
+
 		plugin.getCommand("mantlegive").setExecutor(new CommandMantleGive());
+
+		logger.info("Registered commands!");
 	}
 
 }
