@@ -90,12 +90,11 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockOpened(PlayerInteractEvent event) {
-		if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
 			return;
 		}
 
 		Block block = event.getClickedBlock();
-
 		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
 				.forEach(machine -> interactPos = block.getLocation());
 	}
@@ -114,7 +113,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 
 		ItemStack curStack = event.getCurrentItem();
 
-		if (curStack == null || curStack.getAmount() == 0 || !Material.STAINED_GLASS_PANE.equals(curStack.getType())) {
+		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
 			return;
 		}
 

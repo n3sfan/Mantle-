@@ -155,14 +155,14 @@ public final class Utils {
 
 	/* World */
 	public static boolean isGrowable(Material material) {
-		return material.equals(Material.SOIL) || material.equals(Material.CROPS)
-				|| material.equals(Material.SEEDS)
-				|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
-				|| material.equals(Material.PUMPKIN_SEEDS);
+		return material == Material.SOIL || material == Material.CROPS
+				|| material == Material.SEEDS
+				|| material == Material.BEETROOT_SEEDS || material == Material.MELON_SEEDS
+				|| material == Material.PUMPKIN_SEEDS;
 	}
 
 	public static boolean areStacksEqualIgnoreDurability(ItemStack stackA, ItemStack stackB) {
-		return stackA != null && stackB != null && stackA.getType().equals(stackB.getType()) && stackA.hasItemMeta()
+		return stackA != null && stackB != null && stackA.getType() == stackB.getType() && stackA.hasItemMeta()
 				&& stackB.hasItemMeta() && Bukkit.getItemFactory().equals(stackA.getItemMeta(), stackB.getItemMeta());
 	}
 

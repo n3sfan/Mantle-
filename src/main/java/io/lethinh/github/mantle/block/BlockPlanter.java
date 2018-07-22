@@ -37,9 +37,9 @@ public class BlockPlanter extends BlockMachine {
 
 						Material material = content.getType();
 
-						if (material.equals(Material.CARROT) || material.equals(Material.SEEDS)
-								|| material.equals(Material.BEETROOT_SEEDS) || material.equals(Material.MELON_SEEDS)
-								|| material.equals(Material.MELON_SEEDS)) {
+						if (material == Material.CARROT || material == Material.SEEDS
+								|| material == Material.BEETROOT_SEEDS || material == Material.MELON_SEEDS
+								|| material == Material.MELON_SEEDS) {
 							surround.setType(material);
 							inventory.remove(content);
 						}

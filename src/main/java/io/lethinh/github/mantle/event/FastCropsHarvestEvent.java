@@ -31,7 +31,7 @@ public class FastCropsHarvestEvent implements Listener {
 		Block block = event.getClickedBlock();
 		World world = block.getWorld();
 
-		if (Utils.isGrowable(block.getType()) && !block.getType().equals(Material.SOIL)
+		if (Utils.isGrowable(block.getType()) && block.getType() != Material.SOIL
 				&& block.getData() == CropState.RIPE.getData()) {
 			block.getDrops().forEach(drop -> {
 				world.dropItemNaturally(block.getLocation(), new ItemStack(block.getType(), (int) Math.random() + 1));
