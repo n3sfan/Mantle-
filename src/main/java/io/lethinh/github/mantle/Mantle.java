@@ -1,7 +1,6 @@
 package io.lethinh.github.mantle;
 
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +26,9 @@ public class Mantle extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		// Set instance
+		instance = this;
+
 		// Welcome message
 		Logger logger = getLogger();
 		logger.info("Mantle - an agricultural with tech involvements is starting...");
@@ -45,40 +47,46 @@ public class Mantle extends JavaPlugin {
 		});
 
 		// Machine
-		logger.info("Loading machines' data...");
-
 		try {
+			logger.info("Loading machines data...");
 			BlockMachine.loadMachinesData();
-			logger.info("Loaded machines' data!");
+			logger.info("Loaded machines data!");
+			logger.info("Loading machines inventories data...");
+			BlockMachine.loadMachinesInventoriesData();
+			logger.info("Loaded machines inventories data!");
 		} catch (IOException e) {
 			e.printStackTrace();
-			logger.warning(
-					"Machines' data file wasn't found! This may be due to running this plugin for the first time");
+			logger.warning("An error occured while loading machines or their inventories data!");
 		}
 
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				CopyOnWriteArrayList<BlockMachine> machines = BlockMachine.MACHINES;
-
-				if (machines.isEmpty()) {
+				if (BlockMachine.MACHINES.isEmpty()) {
 					return;
 				}
 
-				machines.forEach(machine -> machine.handleUpdate(Mantle.this));
+				BlockMachine.MACHINES.forEach(machine -> machine.handleUpdate(Mantle.this));
 			}
 		}.runTaskTimerAsynchronously(this, 20L, 20L);
 
-		// Set instance
-		instance = this;
+		logger.info("Mantle is loaded!");
 	}
 
 	@Override
 	public void onDisable() {
+		Logger logger = getLogger();
+
 		try {
+			logger.info("Saving machines data...");
 			BlockMachine.saveMachinesData();
+			logger.info("Saved machines data!");
+			logger.info("Saving machines inventories data...");
+			BlockMachine.saveMachinesInventoriesData();
+			logger.info("Saved machines inventories data!");
 		} catch (IOException e) {
-			getLogger().warning("An error encountered while saving machines' data, contact the developers of Mantle!");
+			logger.warning(
+					"An error occured while saving machines or their inventories data, contact the developers of Mantle!");
 			e.printStackTrace();
 		}
 	}

@@ -40,12 +40,8 @@ public class MachineChangedEvent implements Listener {
 			BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block));
 		}
 
-		if (machine != null) {
-			if (machine instanceof Listener) {
-				Bukkit.getServer().getPluginManager().registerEvents((Listener) machine, Mantle.instance);
-			}
-
-			BlockMachine.addMachineData(machine);
+		if (machine != null && machine instanceof Listener) {
+			Bukkit.getServer().getPluginManager().registerEvents((Listener) machine, Mantle.instance);
 		}
 	}
 
@@ -58,7 +54,6 @@ public class MachineChangedEvent implements Listener {
 					machine.subThread.cancel();
 				}
 
-				BlockMachine.removeMachineData(machine);
 				return true;
 			}
 
