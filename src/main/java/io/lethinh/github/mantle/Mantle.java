@@ -66,7 +66,7 @@ public class Mantle extends JavaPlugin {
 					return;
 				}
 
-				BlockMachine.MACHINES.forEach(machine -> machine.handleUpdate(Mantle.this));
+				BlockMachine.MACHINES.forEach(machine -> machine.tick(Mantle.this));
 			}
 		}.runTaskTimerAsynchronously(this, 20L, 20L);
 
