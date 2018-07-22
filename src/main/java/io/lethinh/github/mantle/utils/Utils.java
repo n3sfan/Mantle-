@@ -100,8 +100,7 @@ public final class Utils {
 				NBTTagCompound enchTag = new NBTTagCompound();
 				enchTag.setInteger("id", ench.getKey().getId());
 				enchTag.setInteger("level", ench.getValue());
-
-				enchantments.appendTag(nbt);
+				enchantments.appendTag(enchTag);
 			}
 
 			stackTags.setTag("enchants", enchantments);
