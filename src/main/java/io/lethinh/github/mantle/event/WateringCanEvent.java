@@ -2,7 +2,6 @@ package io.lethinh.github.mantle.event;
 
 import java.util.Collection;
 
-import org.bukkit.CropState;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -46,8 +45,7 @@ public class WateringCanEvent implements Listener {
 			Collection<Block> surroundings = Utils.getSurroundingBlocks(block, 1, false);
 
 			for (Block surrounding : surroundings) {
-				if (surrounding.isEmpty() || !Utils.isGrowable(material)
-						|| surrounding.getData() == CropState.RIPE.getData()) {
+				if (surrounding.isEmpty() || !Utils.isGrowable(material) || surrounding.getData() == 7) {
 					continue;
 				}
 
