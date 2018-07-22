@@ -1,11 +1,7 @@
 package io.lethinh.github.mantle.utils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -145,17 +141,6 @@ public final class Utils {
 		return ret;
 	}
 
-	/* Encrypt & Decrypt */
-	public static String encodeBase64(String text) {
-		Encoder encoder = Base64.getEncoder();
-		return encoder.encodeToString(text.getBytes(StandardCharsets.UTF_8));
-	}
-
-	public static String decodeBase64(String text) {
-		Decoder decoder = Base64.getDecoder();
-		return new String(decoder.decode(text), StandardCharsets.UTF_8);
-	}
-
 	/* Serialize & Deserialize */
 	public static String serializeLocation(Location location) {
 		return location.getWorld().getName() + "_" + location.getBlockX() + "_" + location.getBlockY() + "_"
@@ -195,14 +180,14 @@ public final class Utils {
 					for (int y = 0; y <= yDist; ++y) {
 						Block neighborBlock = center.getRelative(x, y, z);
 
-						if (predicate.test(center)) {
+						if (predicate == null || predicate.test(neighborBlock)) {
 							ret.add(neighborBlock);
 						}
 					}
 				} else {
 					Block neighborBlock = center.getRelative(x, 0, z);
 
-					if (predicate.test(center)) {
+					if (predicate == null || predicate.test(neighborBlock)) {
 						ret.add(neighborBlock);
 					}
 				}

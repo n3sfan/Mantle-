@@ -18,7 +18,10 @@ public class MantleItemStacks {
 
 	public static final List<ItemStack> STACKS = new ArrayList<>();
 
+	// Items
 	public static final ItemStack WATERING_CAN;
+
+	// Blocks
 	public static final ItemStack TREE_CUTTER;
 	public static final ItemStack PLANTER;
 	public static final ItemStack BEDROCK_BREAKER;

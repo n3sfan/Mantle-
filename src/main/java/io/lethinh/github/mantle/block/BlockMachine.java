@@ -49,6 +49,14 @@ public abstract class BlockMachine {
 	}
 
 	/* Tick */
+	public boolean stoppedTick = false;
+
+	public void tick(Mantle plugin) {
+		if (!stoppedTick) {
+			handleUpdate(plugin);
+		}
+	}
+
 	public abstract void handleUpdate(Mantle plugin);
 
 	/* Object */
