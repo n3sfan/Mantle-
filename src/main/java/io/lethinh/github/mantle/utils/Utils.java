@@ -182,17 +182,12 @@ public final class Utils {
 	}
 
 	public static Collection<Block> getSurroundingBlocks(Block center, int dist, boolean yLayer) {
-		return getSurroundingBlocks(center, dist, dist, dist, yLayer, null);
+		return getSurroundingBlocks(center, dist, dist, dist, yLayer, block -> !block.isEmpty() && !block.isLiquid());
 	}
 
 	public static Collection<Block> getSurroundingBlocks(Block center, int xDist, int yDist, int zDist, boolean yLayer,
 			Predicate<Block> predicate) {
 		List<Block> ret = new ArrayList<>();
-		Predicate<Block> test = block -> !(block.isEmpty() && block.isLiquid());
-
-		if (predicate != null) {
-			test = test.and(predicate);
-		}
 
 		for (int x = -xDist; x <= xDist; ++x) {
 			for (int z = -zDist; z <= zDist; ++z) {
@@ -200,14 +195,14 @@ public final class Utils {
 					for (int y = 0; y <= yDist; ++y) {
 						Block neighborBlock = center.getRelative(x, y, z);
 
-						if (test.test(center)) {
+						if (predicate.test(center)) {
 							ret.add(neighborBlock);
 						}
 					}
 				} else {
 					Block neighborBlock = center.getRelative(x, 0, z);
 
-					if (test.test(center)) {
+					if (predicate.test(center)) {
 						ret.add(neighborBlock);
 					}
 				}

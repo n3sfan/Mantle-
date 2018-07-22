@@ -7,7 +7,6 @@ import org.bukkit.plugin.PluginManager;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.event.BedrockBreakEvent;
-import io.lethinh.github.mantle.event.FastCropsHarvestEvent;
 import io.lethinh.github.mantle.event.FastLeafDecayEvent;
 import io.lethinh.github.mantle.event.MachineChangedEvent;
 import io.lethinh.github.mantle.event.WateringCanEvent;
@@ -30,7 +29,7 @@ public class EventLoader implements ILoader {
 		registerEvents(new WateringCanEvent(), plugin);
 		registerEvents(new MachineChangedEvent(), plugin);
 		registerEvents(new BedrockBreakEvent(), plugin);
-		registerEvents(new FastCropsHarvestEvent(), plugin);
+		// registerEvents(new FastCropsHarvestEvent(), plugin);
 
 		logger.info("Registered events!");
 	}

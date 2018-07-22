@@ -68,21 +68,13 @@ public class MachineChangedEvent implements Listener {
 		}
 
 		Block block = event.getClickedBlock();
-
-		if (block.isEmpty()) {
-			return;
-		}
-
 		Player player = event.getPlayer();
 
-		BlockMachine.MACHINES.forEach(machine -> {
-			if (!block.getLocation().equals(machine.block.getLocation())) {
-				return;
-			}
-
-			event.setCancelled(true);
-			player.openInventory(machine.inventory);
-		});
+		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
+				.forEach(machine -> {
+					event.setCancelled(true);
+					player.openInventory(machine.inventory);
+				});
 	}
 
 }

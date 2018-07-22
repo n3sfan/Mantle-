@@ -1,13 +1,17 @@
 package io.lethinh.github.mantle.block;
 
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -82,11 +86,29 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	}
 
 	/* Event */
+	private Location interactPos;
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBlockOpened(PlayerInteractEvent event) {
+		if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+			return;
+		}
+
+		Block block = event.getClickedBlock();
+
+		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
+				.forEach(machine -> interactPos = block.getLocation());
+	}
+
 	@EventHandler
 	public void onInventoryClicked(InventoryClickEvent event) {
 		Inventory inventory = event.getInventory();
 
 		if (!this.inventory.getName().equals(inventory.getName())) {
+			return;
+		}
+
+		if (!block.getLocation().equals(interactPos)) {
 			return;
 		}
 

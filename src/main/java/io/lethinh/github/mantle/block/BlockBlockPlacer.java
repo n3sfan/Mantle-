@@ -1,10 +1,15 @@
 package io.lethinh.github.mantle.block;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -16,7 +21,7 @@ import io.lethinh.github.mantle.utils.ItemStackFactory;
 /**
  * Created by Le Thinh
  */
-public class BlockBlockPlacer extends BlockMachine {
+public class BlockBlockPlacer extends BlockMachine implements Listener {
 
 	// Placing helper thingy
 	private BlockFace face = BlockFace.NORTH;
@@ -54,12 +59,12 @@ public class BlockBlockPlacer extends BlockMachine {
 					ItemStack content = inventory.getItem(i);
 
 					if (!surround.isEmpty() || content == null || content.getAmount() == 0) {
-						return;
+						continue;
 					}
 
 					surround.setType(content.getType());
 					content.setAmount(content.getAmount() - 1);
-					inventory.setItem(0, content);
+					inventory.setItem(i, content);
 				}
 			}
 		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
@@ -80,11 +85,29 @@ public class BlockBlockPlacer extends BlockMachine {
 	}
 
 	/* Event */
+	private Location interactPos;
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBlockOpened(PlayerInteractEvent event) {
+		if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+			return;
+		}
+
+		Block block = event.getClickedBlock();
+
+		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
+				.forEach(machine -> interactPos = block.getLocation());
+	}
+
 	@EventHandler
 	public void onInventoryClicked(InventoryClickEvent event) {
 		Inventory inventory = event.getInventory();
 
 		if (!this.inventory.getName().equals(inventory.getName())) {
+			return;
+		}
+
+		if (!block.getLocation().equals(interactPos)) {
 			return;
 		}
 
