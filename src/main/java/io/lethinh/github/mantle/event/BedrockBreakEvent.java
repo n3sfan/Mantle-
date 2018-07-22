@@ -28,8 +28,8 @@ public class BedrockBreakEvent implements Listener {
 		World world = player.getWorld();
 		Location blockPos = block.getLocation();
 
-		if (!MantleItemStacks.BEDROCK_BREAKER.equals(stack) || !Material.BEDROCK.equals(block.getType())
-				|| player.getGameMode().equals(GameMode.CREATIVE)) {
+		if (!MantleItemStacks.BEDROCK_BREAKER.equals(stack) || Material.BEDROCK != block.getType()
+				|| player.getGameMode() != GameMode.CREATIVE) {
 			return;
 		}
 
