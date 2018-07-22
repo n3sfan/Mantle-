@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.nbt.NBTTagCompound;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
 
 /**
@@ -64,6 +65,20 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 				surround.setType(Material.AIR);
 			}
 		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+	}
+
+	/* NBT */
+	@Override
+	public NBTTagCompound writeToNBT() {
+		NBTTagCompound nbt = super.writeToNBT();
+		nbt.setInteger("FaceIndex", face.ordinal());
+		return nbt;
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		face = BlockFace.values()[nbt.getInteger("FaceIndex")];
 	}
 
 	/* Event */

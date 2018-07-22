@@ -1,3 +1,10 @@
 name: Mantle
 version: ${project.version}
 main: io.lethinh.github.mantle.Mantle
+
+main: io.lethinh.github.mantle.Mantle
+version: 1.0.0
+commands:
+ mantlegive:
+   description: Give custom items of Mantle plugin
+   usage: /mantlegive <player> <item>
