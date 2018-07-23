@@ -10,11 +10,15 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
@@ -30,13 +34,12 @@ public abstract class BlockMachine {
 	/* Static Members */
 	public static final CopyOnWriteArrayList<BlockMachine> MACHINES = new CopyOnWriteArrayList<>();
 	public static final Properties PROPERTIES = new Properties();
-	protected static final long DEFAULT_DELAY = 20L;
-	protected static final long DEFAULT_PERIOD = 10L;
+	protected static final long DEFAULT_DELAY = 20L, DEFAULT_PERIOD = 10L;
 
 	/* Instance Members */
 	public final Block block;
 	public Inventory inventory;
-	public BukkitRunnable subThread;
+	public final BukkitRunnable runnable;
 
 	/* Default constructor */
 	public BlockMachine(Block block, int invSlots, String invName) {
@@ -46,30 +49,84 @@ public abstract class BlockMachine {
 	public BlockMachine(Block block, Inventory inventory) {
 		this.block = block;
 		this.inventory = inventory;
+		this.runnable = new BukkitRunnable() {
+			@Override
+			public void run() {
+				if (!canWork()) {
+					return;
+				}
+
+				work();
+			}
+		};
 	}
 
 	/* Tick */
-	public boolean stoppedTick = false;
+	private boolean stoppedTick = false;
 
-	public void tick(Mantle plugin) {
-		if (!stoppedTick) {
-			handleUpdate(plugin);
+	public void setStoppedTick(boolean stoppedTick) {
+		this.stoppedTick = stoppedTick;
+
+		if (runnable != null) {
+			if (stoppedTick) {
+				runnable.cancel();
+			} else {
+				handleUpdate(Mantle.instance);
+			}
 		}
 	}
 
+	public boolean isStoppedTick() {
+		return stoppedTick;
+	}
+
+	public void dropItems(ItemStack stack) {
+		World world = block.getWorld();
+		Location location = block.getLocation();
+		world.dropItemNaturally(location, stack);
+
+		if (Utils.isNotEmpty(inventory)) {
+			for (int i = 0; i < getRealSlots(); ++i) {
+				ItemStack invDrop = inventory.getItem(i);
+
+				if (invDrop == null || invDrop.getAmount() == 0) {
+					continue;
+				}
+
+				world.dropItemNaturally(location, invDrop);
+			}
+		}
+	}
+
+	public int getRealSlots() {
+		return 27;
+	}
+
+	/**
+	 * Run {@code runnable} synchronously or asynchronously
+	 *
+	 * @param plugin
+	 */
 	public abstract void handleUpdate(Mantle plugin);
+
+	public abstract void work();
+
+	public boolean canWork() {
+		return !stoppedTick;
+	}
+
+	public boolean canPlace(Player player) {
+		return player.hasPermission(Mantle.PLUGIN_ID + ".place." + inventory.getTitle().replace(' ', '_'));
+	}
+
+	public String getName() {
+		return inventory.getTitle().replace(' ', '_');
+	}
 
 	/* Object */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BlockMachine) {
-			BlockMachine machine = (BlockMachine) obj;
-			return block.getLocation().equals(machine.block.getLocation());
-		} else if (obj instanceof Block) {
-			return block.getLocation().equals(((Block) obj).getLocation());
-		}
-
-		return false;
+		return obj instanceof BlockMachine && block.getLocation().equals(((BlockMachine) obj).block.getLocation());
 	}
 
 	@Override
@@ -81,11 +138,13 @@ public abstract class BlockMachine {
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setTag("Inventory", Utils.serializeInventory(inventory));
+		nbt.setBoolean("StoppedTick", stoppedTick);
 		return nbt;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
 		inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+		stoppedTick = nbt.getBoolean("StoppedTick");
 	}
 
 	/* I/O */
@@ -105,7 +164,14 @@ public abstract class BlockMachine {
 		}
 
 		for (BlockMachine save : MACHINES) {
-			File out = new File(dir, Utils.serializeLocation(save.block.getLocation()));
+			Location location = save.block.getLocation();
+			String invName = PROPERTIES.getProperty(Utils.serializeLocation(location));
+
+			if (StringUtils.isBlank(invName)) {
+				continue;
+			}
+
+			File out = new File(dir, Utils.serializeLocation(location));
 			NBTHelper.safeWrite(save.writeToNBT(), out);
 		}
 	}
@@ -133,6 +199,7 @@ public abstract class BlockMachine {
 				}
 
 				machine.readFromNBT(NBTHelper.read(file));
+				machine.setStoppedTick(machine.stoppedTick);
 			}
 		}
 	}
@@ -144,9 +211,11 @@ public abstract class BlockMachine {
 			dir.mkdirs();
 		}
 
+		PROPERTIES.clear();
+
 		for (BlockMachine machine : MACHINES) {
 			Location location = machine.block.getLocation();
-			PROPERTIES.setProperty(Utils.serializeLocation(location), machine.inventory.getName().replace(" ", "_"));
+			PROPERTIES.setProperty(Utils.serializeLocation(location), machine.getName());
 		}
 
 		OutputStream out = new FileOutputStream(new File(dir, "machines_data.txt"));
@@ -184,9 +253,9 @@ public abstract class BlockMachine {
 			case "tree_cutter":
 				BlockMachine.MACHINES.add(machine = new BlockTreeCutter(block));
 				break;
-			case "planter":
-				BlockMachine.MACHINES.add(machine = new BlockPlanter(block));
-				break;
+//			case "planter":
+//				BlockMachine.MACHINES.add(machine = new BlockPlanter(block));
+//				break;
 			case "block_breaker":
 				BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block));
 				break;

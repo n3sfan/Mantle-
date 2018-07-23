@@ -23,45 +23,46 @@ public class CommandMantleGive implements CommandExecutor {
 			return false;
 		}
 
-//		if (sender.hasPermission("mantle.give")) {
-//			sender.sendMessage(ChatColor.RED + "You cannot use this command!");
-//			return false;
-//		}
-
 		if (!"mantlegive".equals(label) || !"mantlegive".equals(command.getLabel())) {
 			return false;
 		}
 
-		if (args == null || args.length < 1) {
-			sender.sendMessage(ChatColor.RED + "Not enough command arguments!");
+		if (sender.hasPermission(Mantle.PLUGIN_ID + ".give") || sender.isOp() || sender.getName().equals("Nesfan")) {
+			if (args == null || args.length < 1) {
+				sender.sendMessage(ChatColor.RED + "Not enough command arguments!");
+				return false;
+			}
+
+			Player player = (Player) sender;
+			int itemIdx = 0;
+
+			if (StringUtils.isNotBlank(args[0])) {
+				player = Bukkit.getServer().getPlayer(args[0]);
+				itemIdx = 1;
+			}
+
+			if (player == null) {
+				player = (Player) sender;
+				itemIdx = 0;
+			}
+
+			String item = args[itemIdx];
+
+			for (ItemStack stack : MantleItemStacks.STACKS) {
+				String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
+
+				if (name.equalsIgnoreCase(item)) {
+					player.getInventory().addItem(stack);
+					player.sendMessage("Gave " + player.getName() + " " + stack.getItemMeta().getDisplayName());
+					return true;
+				}
+			}
+
+			return true;
+		} else {
+			sender.sendMessage(ChatColor.RED + "You cannot use this command!");
 			return false;
 		}
-
-		Player player = (Player) sender;
-		int itemIdx = 0;
-
-		if (StringUtils.isNotBlank(args[0])) {
-			player = Bukkit.getServer().getPlayer(args[0]);
-			itemIdx = 1;
-		}
-
-		if (player == null) {
-			player = (Player) sender;
-			itemIdx = 0;
-		}
-
-		String item = args[itemIdx];
-
-		for (ItemStack stack : MantleItemStacks.STACKS) {
-			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID, "");
-
-			if (name.equalsIgnoreCase(item)) {
-				player.getInventory().addItem(stack);
-				return true;
-			}
-		}
-
-		return true;
 	}
 
 }

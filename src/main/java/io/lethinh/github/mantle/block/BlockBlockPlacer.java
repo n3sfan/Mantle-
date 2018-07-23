@@ -12,7 +12,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
@@ -50,24 +49,25 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		(subThread = new BukkitRunnable() {
-			@Override
-			public void run() {
-				Block surround = block.getRelative(face);
+		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+	}
 
-				for (int i = 0; i < 27; ++i) {
-					ItemStack content = inventory.getItem(i);
+	@Override
+	public void work() {
+		Block surround = block.getRelative(face);
 
-					if (!surround.isEmpty() || content == null || content.getAmount() == 0) {
-						continue;
-					}
+		for (int i = 0; i < getRealSlots(); ++i) {
+			ItemStack content = inventory.getItem(i);
 
-					surround.setType(content.getType());
-					content.setAmount(content.getAmount() - 1);
-					inventory.setItem(i, content);
-				}
+			if (!surround.isEmpty() || content == null || content.getAmount() == 0
+					|| !content.getType().isBlock()) {
+				continue;
 			}
-		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+
+			surround.setType(content.getType());
+			content.setAmount(content.getAmount() - 1);
+			inventory.setItem(i, content);
+		}
 	}
 
 	/* NBT */
@@ -111,13 +111,13 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 			return;
 		}
 
-		ItemStack curStack = event.getCurrentItem();
-
-		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
+		if (event.getSlot() < 27) {
 			return;
 		}
 
-		if (event.getSlot() < 27) {
+		ItemStack curStack = event.getCurrentItem();
+
+		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
 			return;
 		}
 
