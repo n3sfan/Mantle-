@@ -3,7 +3,6 @@ package io.lethinh.github.mantle.block;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
@@ -14,11 +13,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
+import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
@@ -27,6 +26,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 
 	// Breaking helper thingy
 	private BlockFace face = BlockFace.NORTH;
+	private boolean fancyRender = true;
 
 	public BlockBlockBreaker(Block block) {
 		super(block, 45, "Block Breaker");
@@ -48,27 +48,38 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 				.setLocalizedName("Up").build());
 		inventory.setItem(41, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7))
 				.setLocalizedName("Down").build());
+		inventory.setItem(42, new ItemStackFactory(new ItemStack(Material.FEATHER))
+				.setLocalizedName("Fancy Render: " + fancyRender).setLore("Display effects when block is broken")
+				.build());
 	}
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		World world = block.getWorld();
+		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+	}
 
-		(subThread = new BukkitRunnable() {
+	@Override
+	public void work() {
+		Block surround = block.getRelative(face);
+
+		if (surround.isEmpty() || surround.isLiquid()) {
+			return;
+		}
+
+		if (fancyRender) {
 			@SuppressWarnings("deprecation")
-			@Override
-			public void run() {
-				Block surround = block.getRelative(face);
+			int typeId = surround.getTypeId();
+			block.getWorld().playEffect(surround.getLocation(), Effect.STEP_SOUND, typeId);
+		}
 
-				if (surround.isEmpty() || surround.isLiquid()) {
-					return;
-				}
+		surround.getDrops().forEach(inventory::addItem);
 
-				world.playEffect(surround.getLocation(), Effect.STEP_SOUND, surround.getTypeId());
-				surround.getDrops().forEach(inventory::addItem);
-				surround.setType(Material.AIR);
-			}
-		}).runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+		surround.setType(Material.AIR);
+	}
+
+	@Override
+	public boolean canWork() {
+		return super.canWork() && !Utils.isFull(inventory);
 	}
 
 	/* NBT */
@@ -76,6 +87,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = super.writeToNBT();
 		nbt.setInteger("FaceIndex", face.ordinal());
+		nbt.setBoolean("FancyRender", fancyRender);
 		return nbt;
 	}
 
@@ -83,6 +95,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		face = BlockFace.values()[nbt.getInteger("FaceIndex")];
+		fancyRender = nbt.getBoolean("FancyRender");
 	}
 
 	/* Event */
@@ -102,6 +115,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	@EventHandler
 	public void onInventoryClicked(InventoryClickEvent event) {
 		Inventory inventory = event.getInventory();
+		int slot = event.getSlot();
 
 		if (!this.inventory.getName().equals(inventory.getName())) {
 			return;
@@ -111,13 +125,21 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 			return;
 		}
 
-		ItemStack curStack = event.getCurrentItem();
-
-		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
+		if (event.getSlot() < 27) {
 			return;
 		}
 
-		if (event.getSlot() < 27) {
+		if (slot == 42) {
+			fancyRender = !fancyRender;
+			event.setCancelled(true);
+			inventory.setItem(slot,
+					new ItemStackFactory(inventory.getItem(slot)).setLocalizedName("Fancy Render: " + fancyRender)
+							.build());
+		}
+
+		ItemStack curStack = event.getCurrentItem();
+
+		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
 			return;
 		}
 

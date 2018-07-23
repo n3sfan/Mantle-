@@ -1,6 +1,5 @@
 package io.lethinh.github.mantle.event;
 
-import org.bukkit.CropState;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -31,13 +30,9 @@ public class FastCropsHarvestEvent implements Listener {
 		Block block = event.getClickedBlock();
 		World world = block.getWorld();
 
-		if (Utils.isGrowable(block.getType()) && block.getType() != Material.SOIL
-				&& block.getData() == CropState.RIPE.getData()) {
-			block.getDrops().forEach(drop -> {
-				world.dropItemNaturally(block.getLocation(), new ItemStack(block.getType(), (int) Math.random() + 1));
-				world.dropItemNaturally(block.getLocation(), drop);
-			});
-
+		if (Utils.isGrowable(block.getType()) && block.getType() != Material.SOIL && block.getData() == 7) {
+			world.dropItemNaturally(block.getLocation(), new ItemStack(block.getType(), (int) Math.random() + 1));
+			block.getDrops().forEach(drop -> world.dropItemNaturally(block.getLocation(), drop));
 			block.setType(Material.AIR);
 		}
 	}

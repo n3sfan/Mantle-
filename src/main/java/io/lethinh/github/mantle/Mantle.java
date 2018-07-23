@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.block.BlockMachine;
 import io.lethinh.github.mantle.loader.CommandLoader;
@@ -18,7 +17,7 @@ import io.lethinh.github.mantle.loader.ILoader;
  */
 public class Mantle extends JavaPlugin {
 
-	public static final String PLUGIN_ID = "mantle_"; // Just for enforcements, no conflicts with other plugins
+	public static final String PLUGIN_ID = "mantle"; // Just for enforcements, no conflicts with other plugins
 	public static Mantle instance;
 
 	private EventLoader eventLoader;
@@ -59,16 +58,16 @@ public class Mantle extends JavaPlugin {
 			logger.warning("An error occured while loading machines or their inventories data!");
 		}
 
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				if (BlockMachine.MACHINES.isEmpty()) {
-					return;
-				}
-
-				BlockMachine.MACHINES.forEach(machine -> machine.tick(Mantle.this));
-			}
-		}.runTaskTimerAsynchronously(this, 20L, 20L);
+//		new BukkitRunnable() {
+//			@Override
+//			public void run() {
+//				if (BlockMachine.MACHINES.isEmpty()) {
+//					return;
+//				}
+//
+//				BlockMachine.MACHINES.forEach(machine -> machine.tick(Mantle.this));
+//			}
+//		}.runTaskTimerAsynchronously(this, 20L, 20L);
 
 		logger.info("Mantle is loaded!");
 	}
@@ -86,7 +85,7 @@ public class Mantle extends JavaPlugin {
 			logger.info("Saved machines inventories data!");
 		} catch (IOException e) {
 			logger.warning(
-					"An error occured while saving machines or their inventories data, contact the developers of Mantle!");
+					"An error occured while saving machines or their inventories data, contact the developer of Mantle!");
 			e.printStackTrace();
 		}
 	}

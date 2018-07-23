@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,14 +34,25 @@ public final class Utils {
 	}
 
 	/* Inventory */
+	public static boolean isFull(Inventory inventory) {
+		return IntStream.range(0, inventory.getSize())
+				.allMatch(i -> inventory.getItem(i) != null && inventory.getItem(i).getAmount() == 64);
+	}
+
+	public static boolean isNotEmpty(Inventory inventory) {
+		return IntStream.range(0, inventory.getSize()).anyMatch(i -> inventory.getItem(i) != null);
+	}
+
 	public static NBTTagCompound serializeInventory(Inventory inventory) {
 		NBTTagList nbtTagList = new NBTTagList();
 
 		for (int i = 0; i < inventory.getSize(); ++i) {
-			if (inventory.getItem(i) != null) {
+			ItemStack stack = inventory.getItem(i);
+
+			if (stack != null) {
 				NBTTagCompound itemTag = new NBTTagCompound();
 				itemTag.setInteger("Slot", i);
-				writeNBTToStack(inventory.getItem(i), itemTag);
+				writeNBTToStack(stack, itemTag);
 				nbtTagList.appendTag(itemTag);
 			}
 		}
