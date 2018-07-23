@@ -116,7 +116,7 @@ public abstract class BlockMachine {
 	}
 
 	public boolean canPlace(Player player) {
-		return player.hasPermission(Mantle.PLUGIN_ID + ".place." + inventory.getTitle().replace(' ', '_'));
+		return player.hasPermission(Mantle.PLUGIN_ID + ".place." + getName());
 	}
 
 	public String getName() {
