@@ -1,5 +1,6 @@
 package io.lethinh.github.mantle.command;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import io.lethinh.github.mantle.utils.Utils;
@@ -29,7 +30,9 @@ public abstract class AbstractCommand {
 		case DONT_CARE:
 			break;
 		case MISSING_ARGS:
-			// TODO Do stuff
+			if(getFormat() != null){
+				sender.sendMessage(Utils.getColoredString("&cFormat: &f" + getFormat()));
+			}
 			break;
 		case NO_PERMISSION:
 			sender.sendMessage(Utils.getColoredString("&4Missing Permission: &c" + permission));
@@ -52,6 +55,10 @@ public abstract class AbstractCommand {
 
 	public String[] getArgs() {
 		return args;
+	}
+
+	public String getFormat() {
+		return null;
 	}
 
 	public CommandSender getSender() {
