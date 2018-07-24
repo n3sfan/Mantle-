@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -209,4 +210,8 @@ public final class Utils {
 		return Collections.unmodifiableCollection(ret);
 	}
 
+
+	public static String getColoredString(String s){
+	    return ChatColor.translateAlternateColorCodes('&', s);
+    }
 }
