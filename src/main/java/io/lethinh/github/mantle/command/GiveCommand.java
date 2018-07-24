@@ -62,11 +62,6 @@ public class GiveCommand extends AbstractCommand {
 		return ExecutionResult.DONT_CARE;
 	}
 
-	@Override
-    public String getFormat(){
-	    return "/mantle give <item> [Player]";
-    }
-
 	private boolean giveItem(String item, Player target) {
 		for (ItemStack stack : MantleItemStacks.STACKS) {
 			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
