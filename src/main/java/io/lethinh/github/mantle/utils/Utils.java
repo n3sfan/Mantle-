@@ -44,43 +44,6 @@ public final class Utils {
 		return IntStream.range(0, inventory.getSize()).anyMatch(i -> inventory.getItem(i) != null);
 	}
 
-	public static NBTTagCompound serializeInventory(Inventory inventory) {
-		NBTTagList nbtTagList = new NBTTagList();
-
-		for (int i = 0; i < inventory.getSize(); ++i) {
-			ItemStack stack = inventory.getItem(i);
-
-			if (stack != null) {
-				NBTTagCompound itemTag = new NBTTagCompound();
-				itemTag.setInteger("Slot", i);
-				writeNBTToStack(stack, itemTag);
-				nbtTagList.appendTag(itemTag);
-			}
-		}
-
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("Items", nbtTagList);
-		nbt.setInteger("Size", inventory.getSize());
-		nbt.setString("Title", inventory.getTitle());
-		return nbt;
-	}
-
-	public static Inventory deserializeInventory(NBTTagCompound nbt) {
-		Inventory inventory = Bukkit.createInventory(null, nbt.getInteger("Size"), nbt.getString("Title"));
-		NBTTagList tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < tagList.tagCount(); ++i) {
-			NBTTagCompound itemTags = tagList.getCompoundTagAt(i);
-			int slot = itemTags.getInteger("Slot");
-
-			if (slot >= 0 && slot < inventory.getSize()) {
-				inventory.setItem(slot, readStackFromNBT(itemTags));
-			}
-		}
-
-		return inventory;
-	}
-
 	@SuppressWarnings("deprecation")
 	public static NBTTagCompound writeNBTToStack(ItemStack stack, NBTTagCompound nbt) {
 		nbt.setInteger("id", stack.getTypeId());
@@ -155,6 +118,43 @@ public final class Utils {
 	}
 
 	/* Serialize & Deserialize */
+	public static NBTTagCompound serializeInventory(Inventory inventory) {
+		NBTTagList nbtTagList = new NBTTagList();
+
+		for (int i = 0; i < inventory.getSize(); ++i) {
+			ItemStack stack = inventory.getItem(i);
+
+			if (stack != null) {
+				NBTTagCompound itemTag = new NBTTagCompound();
+				itemTag.setInteger("Slot", i);
+				writeNBTToStack(stack, itemTag);
+				nbtTagList.appendTag(itemTag);
+			}
+		}
+
+		NBTTagCompound nbt = new NBTTagCompound();
+		nbt.setTag("Items", nbtTagList);
+		nbt.setInteger("Size", inventory.getSize());
+		nbt.setString("Title", inventory.getTitle());
+		return nbt;
+	}
+
+	public static Inventory deserializeInventory(NBTTagCompound nbt) {
+		Inventory inventory = Bukkit.createInventory(null, nbt.getInteger("Size"), nbt.getString("Title"));
+		NBTTagList tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < tagList.tagCount(); ++i) {
+			NBTTagCompound itemTags = tagList.getCompoundTagAt(i);
+			int slot = itemTags.getInteger("Slot");
+
+			if (slot >= 0 && slot < inventory.getSize()) {
+				inventory.setItem(slot, readStackFromNBT(itemTags));
+			}
+		}
+
+		return inventory;
+	}
+
 	public static String serializeLocation(Location location) {
 		return location.getWorld().getName() + "_" + location.getBlockX() + "_" + location.getBlockY() + "_"
 				+ location.getBlockZ();
@@ -210,8 +210,7 @@ public final class Utils {
 		return Collections.unmodifiableCollection(ret);
 	}
 
-
-	public static String getColoredString(String s){
-	    return ChatColor.translateAlternateColorCodes('&', s);
-    }
+	public static String getColoredString(String s) {
+		return ChatColor.translateAlternateColorCodes('&', s);
+	}
 }

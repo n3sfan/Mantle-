@@ -85,7 +85,7 @@ public abstract class BlockMachine {
 		Location location = block.getLocation();
 		world.dropItemNaturally(location, stack);
 
-		if (Utils.isNotEmpty(inventory)) {
+		if (Utils.isNotEmpty(inventory) && getRealSlots() > 0) {
 			for (int i = 0; i < getRealSlots(); ++i) {
 				ItemStack invDrop = inventory.getItem(i);
 

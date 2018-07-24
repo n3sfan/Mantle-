@@ -59,12 +59,17 @@ public class BlockMobMagnet extends BlockMachine {
 		}
 
 		for (Entity entity : entities) {
-			if (!(entity instanceof Monster) || entity.isDead()) {
+			if (!(entity instanceof Monster) || entity.isDead() || entity.getLocation().equals(blockPos)) {
 				continue;
 			}
 
 			entity.setVelocity(blockPos.subtract(entity.getLocation()).toVector());
 		}
+	}
+
+	@Override
+	public int getRealSlots() {
+		return 0;
 	}
 
 	/* NBT */
