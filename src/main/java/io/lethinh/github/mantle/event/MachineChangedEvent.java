@@ -20,6 +20,7 @@ import io.lethinh.github.mantle.MantleItemStacks;
 import io.lethinh.github.mantle.block.BlockBlockBreaker;
 import io.lethinh.github.mantle.block.BlockBlockPlacer;
 import io.lethinh.github.mantle.block.BlockMachine;
+import io.lethinh.github.mantle.block.BlockMobMagnet;
 import io.lethinh.github.mantle.block.BlockTreeCutter;
 
 /**
@@ -31,6 +32,7 @@ public class MachineChangedEvent implements Listener {
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		ItemStack heldItem = event.getItemInHand();
+		ItemStack copy = heldItem.clone();
 		Block block = event.getBlockPlaced();
 		BlockMachine machine = null;
 
@@ -44,6 +46,8 @@ public class MachineChangedEvent implements Listener {
 			BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block));
 		} else if (heldItem.isSimilar(MantleItemStacks.BLOCK_PLACER)) {
 			BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block));
+		} else if (heldItem.isSimilar(MantleItemStacks.MOB_MAGNET)) {
+			BlockMachine.MACHINES.add(machine = new BlockMobMagnet(block));
 		}
 
 		if (machine != null) {
@@ -60,7 +64,7 @@ public class MachineChangedEvent implements Listener {
 					@Override
 					public void run() {
 						block.setType(Material.AIR);
-						player.getInventory().setItemInMainHand(heldItem);
+						player.getInventory().addItem(copy);
 						player.sendMessage(ChatColor.RED +
 								"Oops, look like you cannot use this block! Please get higher level or permission.");
 					}

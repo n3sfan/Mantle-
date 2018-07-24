@@ -1,7 +1,7 @@
 package io.lethinh.github.mantle;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,7 +16,7 @@ import io.lethinh.github.mantle.utils.ItemStackFactory;
  */
 public class MantleItemStacks {
 
-	public static final List<ItemStack> STACKS = new ArrayList<>();
+	public static final Set<ItemStack> STACKS = new HashSet<>();
 
 	// Items
 	public static final ItemStack WATERING_CAN;
@@ -27,6 +27,7 @@ public class MantleItemStacks {
 	// public static final ItemStack PLANTER;
 	public static final ItemStack BLOCK_BREAKER;
 	public static final ItemStack BLOCK_PLACER;
+	public static final ItemStack MOB_MAGNET;
 
 	static {
 		// Watering Can
@@ -82,6 +83,16 @@ public class MantleItemStacks {
 				.setDisplayName(ChatColor.LIGHT_PURPLE + "Block Placer").build();
 
 		STACKS.add(BLOCK_PLACER);
+
+		// Mob Magnet
+		MOB_MAGNET = new ItemStackFactory(new ItemStack(Material.NOTE_BLOCK))
+				.addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)
+				.addEnchant(Enchantment.KNOCKBACK, 10)
+				.setLocalizedName(Mantle.PLUGIN_ID + "_mob_magnet")
+				.setDisplayName(ChatColor.LIGHT_PURPLE + "MobMagnet").setLore("Pull all mobs towards this block")
+				.build();
+
+		STACKS.add(MOB_MAGNET);
 	}
 
 }
