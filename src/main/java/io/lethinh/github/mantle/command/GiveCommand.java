@@ -29,6 +29,7 @@ public class GiveCommand extends AbstractCommand {
             if(!giveItem(getArgs()[0], target)){
                 getSender().sendMessage(Utils.getColoredString("&cItem &4" + getArgs()[0] + "not found"));
             }
+            return null;
         }
 
         Player target = Bukkit.getPlayer(getArgs()[0]);

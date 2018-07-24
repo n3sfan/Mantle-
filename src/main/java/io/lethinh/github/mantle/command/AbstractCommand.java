@@ -28,12 +28,13 @@ public abstract class AbstractCommand {
             case NOPERMISSION:
                 sender.sendMessage(Utils.getColoredString("&4Missing Permission: &c" + permission));
                 return;
+            case NOPLAYER:
+                sender.sendMessage(Utils.getColoredString("&4Player is not excist or isn't online"));
+                return;
+            case CONSOLENOTPERMITTED:
+                sender.sendMessage(Utils.getColoredString("&4This command is not available to console"));
+                return;
         }
-        success();
-    }
-
-    public void success(){
-        sender.sendMessage(Utils.getColoredString("&aSuccess"));
     }
 
     public String getPermission() {

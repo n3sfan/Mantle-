@@ -26,10 +26,10 @@ public class MantleAdminCommands implements CommandExecutor {
 		else{
 			switch (args[0].toLowerCase()){
 				case "give":
-					new GiveCommand(args, sender);
+					new GiveCommand(args, sender).execute();
 					break;
 				case "list":
-					new ListCommand(sender);
+					new ListCommand(sender).execute();
 					break;
 				default:
 					sender.sendMessage(Utils.getColoredString("&cInvalid Argument"));
