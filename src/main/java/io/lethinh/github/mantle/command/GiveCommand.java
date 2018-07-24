@@ -22,22 +22,23 @@ public class GiveCommand extends AbstractCommand {
 	public ExecutionResult now() {
 		CommandSender sender = getSender();
 
-		if (!sender.hasPermission(getPermission()) && !sender.getName().equals("Nesfan")) {
+		if (!sender.hasPermission(getPermission())) {
 			return ExecutionResult.NO_PERMISSION;
 		}
 
 		String[] args = getArgs();
+        if (args.length < 1) {
+            return ExecutionResult.MISSING_ARGS;
+        }
+
 		String name = args[0];
 
-		if (args.length < 1) {
-			return ExecutionResult.MISSING_ARGS;
-		} else if (args.length == 2) {
+		if (args.length == 2) {
 			if (!(sender instanceof Player)) {
 				return ExecutionResult.CONSOLE_NOT_PERMITTED;
 			}
 
 			Player target = (Player) sender;
-
 			if (!giveItem(name, target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + name + "wasn't found"));
 			}
@@ -46,7 +47,6 @@ public class GiveCommand extends AbstractCommand {
 		}
 
 		Player target = Bukkit.getPlayer(name);
-
 		if (target == null || !target.isOnline()) {
 			return ExecutionResult.NO_PLAYER;
 		}
