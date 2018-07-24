@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import org.bukkit.command.CommandExecutor;
 
 import io.lethinh.github.mantle.Mantle;
-import io.lethinh.github.mantle.command.CommandMantleGive;
+import io.lethinh.github.mantle.command.MantleAdminCommands;
 
 /**
  * Created by Le Thinh
@@ -21,7 +21,7 @@ public class CommandLoader implements ILoader {
 		Logger logger = plugin.getLogger();
 		logger.info("Registering commands...");
 
-		registerCommand(plugin, "mantlegive", new CommandMantleGive());
+		registerCommand(plugin, "mantle", new MantleAdminCommands());
 
 		logger.info("Registered commands!");
 	}
