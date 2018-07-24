@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -24,12 +25,12 @@ import io.lethinh.github.mantle.utils.ItemStackFactory;
 /**
  * Created by Le Thinh
  */
-public class BlockMobMagnet extends BlockMachine {
+public class BlockMobMagnet extends BlockMachine implements Listener {
 
-	private int xExpand = 7, yExpand = 30, zExpand = 7;
+	private int xExpand = 7, yExpand = 7, zExpand = 7;
 
-	public BlockMobMagnet(Block block) {
-		super(block, 9, "Mob Magnet");
+	public BlockMobMagnet(Block block, String... players) {
+		super(block, 9, "Mob Magnet", players);
 
 		// Inventory
 		inventory.setItem(0, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 1))

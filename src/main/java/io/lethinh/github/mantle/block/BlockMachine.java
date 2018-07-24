@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,8 +24,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.nbt.Constants;
 import io.lethinh.github.mantle.nbt.NBTHelper;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
+import io.lethinh.github.mantle.nbt.NBTTagList;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
@@ -40,14 +44,22 @@ public abstract class BlockMachine {
 	public final Block block;
 	public Inventory inventory;
 	public final BukkitRunnable runnable;
+	public List<String> accessiblePlayers;
 
 	/* Default constructor */
-	public BlockMachine(Block block, int invSlots, String invName) {
-		this(block, Bukkit.createInventory(null, invSlots, invName));
+	public BlockMachine(Block block, int invSlots, String invName, String... players) {
+		this(block, Bukkit.createInventory(null, invSlots, invName), players);
 	}
 
-	public BlockMachine(Block block, Inventory inventory) {
+	public BlockMachine(Block block, Inventory inventory, String... players) {
 		this.block = block;
+
+		this.accessiblePlayers = new ArrayList<>();
+
+		for (String player : players) {
+			accessiblePlayers.add(player);
+		}
+
 		this.inventory = inventory;
 		this.runnable = new BukkitRunnable() {
 			@Override
@@ -121,6 +133,10 @@ public abstract class BlockMachine {
 		return true;
 	}
 
+	public boolean canOpen(Player player) {
+		return accessiblePlayers.stream().anyMatch(p -> p.equals(player.getName()));
+	}
+
 	public String getName() {
 		return inventory.getTitle().replace(' ', '_');
 	}
@@ -140,13 +156,40 @@ public abstract class BlockMachine {
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setTag("Inventory", Utils.serializeInventory(inventory));
-		nbt.setBoolean("StoppedTick", stoppedTick);
+		nbt.setBoolean("StoppedTick", isStoppedTick());
+
+		NBTTagList playerTags = new NBTTagList();
+
+		for (int i = 0; i < accessiblePlayers.size(); ++i) {
+			NBTTagCompound playerTag = new NBTTagCompound();
+			playerTag.setInteger("Index", i);
+			playerTag.setString("Name", accessiblePlayers.get(i));
+			playerTags.appendTag(playerTag);
+		}
+
+		nbt.setTag("AllowedPlayers", playerTags);
+		nbt.setInteger("AllowedSize", accessiblePlayers.size());
+
 		return nbt;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
 		inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
-		stoppedTick = nbt.getBoolean("StoppedTick");
+		setStoppedTick(nbt.getBoolean("StoppedTick"));
+
+		int allowedSize = nbt.getInteger("AllowedSize");
+		accessiblePlayers = new ArrayList<>(allowedSize);
+		NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < playerTags.tagCount(); ++i) {
+			NBTTagCompound playerTag = playerTags.getCompoundTagAt(i);
+			int index = playerTag.getInteger("Index");
+			String name = playerTag.getString("Name");
+
+			if (index >= 0 && index < allowedSize) {
+				accessiblePlayers.set(index, name);
+			}
+		}
 	}
 
 	/* I/O */
@@ -201,7 +244,6 @@ public abstract class BlockMachine {
 				}
 
 				machine.readFromNBT(NBTHelper.read(file));
-				machine.setStoppedTick(machine.stoppedTick);
 			}
 		}
 	}

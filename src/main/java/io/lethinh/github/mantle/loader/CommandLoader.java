@@ -13,7 +13,7 @@ import io.lethinh.github.mantle.command.MantleAdminCommands;
 public class CommandLoader implements ILoader {
 
 	public CommandLoader() {
-		LOADERS.add(this);
+		preLoad();
 	}
 
 	@Override

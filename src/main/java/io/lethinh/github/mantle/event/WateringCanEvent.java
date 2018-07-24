@@ -1,7 +1,5 @@
 package io.lethinh.github.mantle.event;
 
-import java.util.Collection;
-
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -15,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.MantleItemStacks;
+import io.lethinh.github.mantle.utils.AreaManager;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
@@ -42,9 +41,13 @@ public class WateringCanEvent implements Listener {
 
 		if (Utils.isGrowable(material) || Material.SAPLING.equals(material)) {
 			int growthMask = 0;
-			Collection<Block> surroundings = Utils.getSurroundingBlocks(block, 1, false);
+			AreaManager manager = new AreaManager(block, 1, 1, 1, true);
 
-			for (Block surrounding : surroundings) {
+			if (manager.isAreaEmpty()) {
+				return;
+			}
+
+			for (Block surrounding : manager) {
 				if (surrounding.isEmpty() || !Utils.isGrowable(material) || surrounding.getData() == 7) {
 					continue;
 				}

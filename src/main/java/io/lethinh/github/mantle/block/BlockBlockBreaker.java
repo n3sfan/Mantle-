@@ -28,8 +28,8 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	private BlockFace face = BlockFace.NORTH;
 	private boolean fancyRender = true;
 
-	public BlockBlockBreaker(Block block) {
-		super(block, 45, "Block Breaker");
+	public BlockBlockBreaker(Block block, String... players) {
+		super(block, 45, "Block Breaker", players);
 
 		// Inventory
 		for (int i = 27; i < 36; ++i) {
@@ -55,7 +55,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+		runnable.runTaskTimer(plugin, DEFAULT_DELAY * 2L, DEFAULT_PERIOD);
 	}
 
 	@Override
@@ -73,7 +73,6 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 		}
 
 		surround.getDrops().forEach(inventory::addItem);
-
 		surround.setType(Material.AIR);
 	}
 

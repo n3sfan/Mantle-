@@ -17,7 +17,7 @@ import io.lethinh.github.mantle.event.WateringCanEvent;
 public class EventLoader implements ILoader {
 
 	public EventLoader() {
-		LOADERS.add(this);
+		preLoad();
 	}
 
 	@Override

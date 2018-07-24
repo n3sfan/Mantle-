@@ -1,7 +1,5 @@
 package io.lethinh.github.mantle.block;
 
-import java.util.Collection;
-
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
+import io.lethinh.github.mantle.utils.AreaManager;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
 import io.lethinh.github.mantle.utils.Utils;
 
@@ -29,8 +28,8 @@ public class BlockTreeCutter extends BlockMachine implements Listener {
 	private int xExpand = 7, yExpand = 30, zExpand = 7;
 	private boolean fancyRender = true;
 
-	public BlockTreeCutter(Block block) {
-		super(block, 45, "Tree Cutter");
+	public BlockTreeCutter(Block block, String... players) {
+		super(block, 45, "Tree Cutter", players);
 
 		// Inventory
 		for (int i = 27; i < 36; ++i) {
@@ -54,19 +53,20 @@ public class BlockTreeCutter extends BlockMachine implements Listener {
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+		runnable.runTaskTimer(plugin, 3600L, DEFAULT_PERIOD);
 	}
 
 	@Override
 	public void work() {
-		Collection<Block> surroundings = Utils.getSurroundingBlocks(block, xExpand, yExpand, zExpand, true,
-				b -> !b.getLocation().equals(block.getLocation()));
+		AreaManager manager = new AreaManager(block, xExpand, zExpand, zExpand, true,
+				b -> !b.isEmpty() && !b.isLiquid() && !b.getLocation().equals(block.getLocation()));
+		manager.scanBlocks();
 
-		if (surroundings.isEmpty()) {
+		if (manager.isAreaEmpty()) {
 			return;
 		}
 
-		for (Block surround : surroundings) {
+		for (Block surround : manager) {
 			Material material = surround.getType();
 
 			if (material.equals(Material.LOG) || material.equals(Material.LOG_2)

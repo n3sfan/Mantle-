@@ -13,4 +13,8 @@ public interface ILoader {
 
 	void load(Mantle plugin) throws Exception;
 
+	default void preLoad() {
+		LOADERS.add(this);
+	}
+
 }

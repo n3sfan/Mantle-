@@ -25,8 +25,8 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 	// Placing helper thingy
 	private BlockFace face = BlockFace.NORTH;
 
-	public BlockBlockPlacer(Block block) {
-		super(block, 45, "Block Placer");
+	public BlockBlockPlacer(Block block, String... players) {
+		super(block, 45, "Block Placer", players);
 
 		// Inventory
 		for (int i = 27; i < 36; ++i) {

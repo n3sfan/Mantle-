@@ -10,9 +10,13 @@ import io.lethinh.github.mantle.utils.Utils;
  */
 public abstract class AbstractCommand {
 
-	private String permission;
-	private String[] args;
-	private CommandSender sender;
+	private final String permission;
+	private final String[] args;
+	private final CommandSender sender;
+
+	public AbstractCommand(CommandSender sender) {
+		this(null, new String[0], sender);
+	}
 
 	public AbstractCommand(String permission, String[] args, CommandSender sender) {
 		this.permission = permission;
@@ -30,15 +34,14 @@ public abstract class AbstractCommand {
 		case DONT_CARE:
 			break;
 		case MISSING_ARGS:
-			if(getFormat() != null){
-				sender.sendMessage(Utils.getColoredString("&cFormat: &f" + getFormat()));
-			}
+			// TODO Do stuff
+			sender.sendMessage(ChatColor.DARK_RED + "Not enough command arguments!");
 			break;
 		case NO_PERMISSION:
 			sender.sendMessage(Utils.getColoredString("&4Missing Permission: &c" + permission));
 			break;
 		case NO_PLAYER:
-			sender.sendMessage(Utils.getColoredString("&4Player is not excist or isn't online"));
+			sender.sendMessage(Utils.getColoredString("&4Player is not exist or isn't online"));
 			break;
 		case CONSOLE_NOT_PERMITTED:
 			sender.sendMessage(Utils.getColoredString("&4This command is not available to console"));
@@ -55,10 +58,6 @@ public abstract class AbstractCommand {
 
 	public String[] getArgs() {
 		return args;
-	}
-
-	public String getFormat() {
-		return null;
 	}
 
 	public CommandSender getSender() {

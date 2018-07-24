@@ -31,23 +31,24 @@ public class MachineChangedEvent implements Listener {
 	@EventHandler
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
+		String name = player.getName();
 		ItemStack heldItem = event.getItemInHand();
 		ItemStack copy = heldItem.clone();
 		Block block = event.getBlockPlaced();
 		BlockMachine machine = null;
 
 		if (heldItem.isSimilar(MantleItemStacks.TREE_CUTTER)) {
-			BlockMachine.MACHINES.add(machine = new BlockTreeCutter(block));
+			BlockMachine.MACHINES.add(machine = new BlockTreeCutter(block, name));
 		} /*
 			 * else if (heldItem.isSimilar(MantleItemStacks.PLANTER)) {
 			 * BlockMachine.MACHINES.add(machine = new BlockPlanter(block)); }
 			 */
 		else if (heldItem.isSimilar(MantleItemStacks.BLOCK_BREAKER)) {
-			BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block));
+			BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block, name));
 		} else if (heldItem.isSimilar(MantleItemStacks.BLOCK_PLACER)) {
-			BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block));
+			BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block, name));
 		} else if (heldItem.isSimilar(MantleItemStacks.MOB_MAGNET)) {
-			BlockMachine.MACHINES.add(machine = new BlockMobMagnet(block));
+			BlockMachine.MACHINES.add(machine = new BlockMobMagnet(block, name));
 		}
 
 		if (machine != null) {
@@ -111,7 +112,10 @@ public class MachineChangedEvent implements Listener {
 		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
 				.forEach(machine -> {
 					event.setCancelled(true);
-					player.openInventory(machine.inventory);
+
+					if (machine.canOpen(player)) {
+						player.openInventory(machine.inventory);
+					}
 				});
 	}
 

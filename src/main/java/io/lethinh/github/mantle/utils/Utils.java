@@ -1,12 +1,8 @@
 package io.lethinh.github.mantle.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,13 +10,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.NumberConversions;
 
+import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.nbt.Constants;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
 import io.lethinh.github.mantle.nbt.NBTTagList;
@@ -32,6 +30,11 @@ public final class Utils {
 
 	private Utils() {
 
+	}
+
+	/* Internal */
+	public static NamespacedKey prefixNamespaced(String key) {
+		return new NamespacedKey(Mantle.instance, key);
 	}
 
 	/* Inventory */
@@ -179,38 +182,34 @@ public final class Utils {
 				&& stackB.hasItemMeta() && Bukkit.getItemFactory().equals(stackA.getItemMeta(), stackB.getItemMeta());
 	}
 
-	public static Collection<Block> getSurroundingBlocks(Block center, int dist, boolean yLayer) {
-		return getSurroundingBlocks(center, dist, dist, dist, yLayer, block -> !block.isEmpty() && !block.isLiquid());
-	}
-
-	public static Collection<Block> getSurroundingBlocks(Block center, int xDist, int yDist, int zDist, boolean yLayer,
-			Predicate<Block> predicate) {
-		List<Block> ret = new ArrayList<>();
-
-		for (int x = -xDist; x <= xDist; ++x) {
-			for (int z = -zDist; z <= zDist; ++z) {
-				if (yLayer) {
-					for (int y = 0; y <= yDist; ++y) {
-						Block neighborBlock = center.getRelative(x, y, z);
-
-						if (predicate == null || predicate.test(neighborBlock)) {
-							ret.add(neighborBlock);
-						}
-					}
-				} else {
-					Block neighborBlock = center.getRelative(x, 0, z);
-
-					if (predicate == null || predicate.test(neighborBlock)) {
-						ret.add(neighborBlock);
-					}
-				}
-			}
-		}
-
-		return Collections.unmodifiableCollection(ret);
-	}
-
 	public static String getColoredString(String s) {
 		return ChatColor.translateAlternateColorCodes('&', s);
 	}
+
+	public static BlockFace[] getMainFaces() {
+		return new BlockFace[] { BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST,
+				BlockFace.EAST };
+	}
+
+	public static Location offsetLocation(Location location, BlockFace face) {
+		return location.add(face.getModX(), face.getModY(), face.getModZ());
+	}
+
+	public static BlockFace getEntityDirection(Location location) {
+		BlockFace dir = BlockFace.NORTH;
+		float f = Float.MIN_VALUE;
+
+		for (BlockFace face : getMainFaces()) {
+			float f1 = (float) (location.getX() * face.getModX() + location.getY() * face.getModY()
+					+ location.getZ() * face.getModZ());
+
+			if (f1 > f) {
+				f = f1;
+				dir = face;
+			}
+		}
+
+		return dir;
+	}
+
 }
