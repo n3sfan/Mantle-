@@ -33,7 +33,7 @@ public class GiveCommand extends AbstractCommand {
 
 		String name = args[0];
 
-		if (args.length == 2) {
+		if (args.length == 1) {
 			if (!(sender instanceof Player)) {
 				return ExecutionResult.CONSOLE_NOT_PERMITTED;
 			}
