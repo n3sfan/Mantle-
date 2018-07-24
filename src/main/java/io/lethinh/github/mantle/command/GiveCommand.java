@@ -23,13 +23,20 @@ public class GiveCommand extends AbstractCommand {
 		CommandSender sender = getSender();
 		String[] args = getArgs();
 
-		if (!sender.hasPermission(getPermission()) && !sender.getName().equals("Nesfan")) {
+		if (!sender.hasPermission(getPermission())) {
 			return ExecutionResult.NO_PERMISSION;
 		}
 
+<<<<<<< HEAD
 		if (args.length < 1) {
 			return ExecutionResult.MISSING_ARGS;
 		}
+=======
+		String[] args = getArgs();
+        if (args.length < 1) {
+            return ExecutionResult.MISSING_ARGS;
+        }
+>>>>>>> master
 
 		String name = args[0];
 
@@ -39,7 +46,6 @@ public class GiveCommand extends AbstractCommand {
 			}
 
 			Player target = (Player) sender;
-
 			if (!giveItem(name, target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + name + "wasn't found"));
 			}
@@ -48,6 +54,7 @@ public class GiveCommand extends AbstractCommand {
 		} else if (args.length == 2) {
 			Player target = Bukkit.getPlayer(name);
 
+<<<<<<< HEAD
 			if (target == null || !target.isOnline()) {
 				return ExecutionResult.NO_PLAYER;
 			}
@@ -55,6 +62,12 @@ public class GiveCommand extends AbstractCommand {
 			if (!giveItem(args[1], target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
 			}
+=======
+		Player target = Bukkit.getPlayer(name);
+		if (target == null || !target.isOnline()) {
+			return ExecutionResult.NO_PLAYER;
+		}
+>>>>>>> master
 
 			return ExecutionResult.DONT_CARE;
 		}
@@ -62,6 +75,14 @@ public class GiveCommand extends AbstractCommand {
 		return ExecutionResult.DONT_CARE;
 	}
 
+<<<<<<< HEAD
+=======
+	@Override
+    public String getFormat(){
+	    return "/mantle give <item> [Player]";
+    }
+
+>>>>>>> master
 	private boolean giveItem(String item, Player target) {
 		for (ItemStack stack : MantleItemStacks.STACKS) {
 			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
