@@ -51,11 +51,19 @@ public class GiveCommand extends AbstractCommand {
 			if (target == null || !target.isOnline()) {
 				return ExecutionResult.NO_PLAYER;
 			}
+<<<<<<< HEAD
 
 			if (!giveItem(args[1], target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
 			}
 
+=======
+
+			if (!giveItem(args[1], target)) {
+				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			}
+
+>>>>>>> master
 			return ExecutionResult.DONT_CARE;
 		}
 
