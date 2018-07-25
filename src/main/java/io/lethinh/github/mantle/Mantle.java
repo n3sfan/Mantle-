@@ -18,6 +18,7 @@ import io.lethinh.github.mantle.loader.ILoader;
 public class Mantle extends JavaPlugin {
 
 	public static final String PLUGIN_ID = "mantle"; // Just for enforcements, no conflicts with other plugins
+	public static final String VERSION = "1.0.1";
 	public static Mantle instance;
 
 	private EventLoader eventLoader;

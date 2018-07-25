@@ -1,6 +1,6 @@
 name: Mantle
 main: io.lethinh.github.mantle.Mantle
-version: 1.0.0
+version: 1.0.1
 commands:
  mantle:
    description: Give custom items of Mantle plugin

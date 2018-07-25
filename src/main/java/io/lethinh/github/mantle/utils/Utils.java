@@ -164,15 +164,19 @@ public final class Utils {
 	}
 
 	public static Location deserializeLocation(String serialization) {
-		String[] split = serialization.split("_");
-		return new Location(Bukkit.getWorld(split[0]), NumberConversions.toInt(split[1]),
-				NumberConversions.toInt(split[2]), NumberConversions.toInt(split[3]));
+		try {
+			String[] split = serialization.split("_");
+			return new Location(Bukkit.getWorld(split[0]), NumberConversions.toInt(split[1]),
+					NumberConversions.toInt(split[2]), NumberConversions.toInt(split[3]));
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 
 	/* World */
 	public static boolean isGrowable(Material material) {
-		return material == Material.SOIL || material == Material.CROPS
-				|| material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
+		return material == Material.SOIL || material == Material.CROPS || material == Material.SEEDS
+				|| material == Material.CARROT || material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
 				|| material == Material.PUMPKIN_STEM;
 	}
 

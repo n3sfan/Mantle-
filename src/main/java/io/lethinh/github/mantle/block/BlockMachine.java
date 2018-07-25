@@ -43,6 +43,7 @@ public abstract class BlockMachine {
 	public static final CopyOnWriteArrayList<BlockMachine> MACHINES = new CopyOnWriteArrayList<>();
 	public static final Properties PROPERTIES = new Properties();
 	protected static final long DEFAULT_DELAY = 20L, DEFAULT_PERIOD = 10L;
+	private static boolean legacyConfig = false;
 
 	/* Instance Members */
 	public final Block block;
@@ -159,6 +160,7 @@ public abstract class BlockMachine {
 	/* NBT */
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = new NBTTagCompound();
+
 		nbt.setTag("Inventory", Utils.serializeInventory(inventory));
 		nbt.setBoolean("StoppedTick", isStoppedTick());
 
@@ -178,20 +180,46 @@ public abstract class BlockMachine {
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
-		inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
-		setStoppedTick(nbt.getBoolean("StoppedTick"));
+		if (legacyConfig) {
+			if (nbt.hasKey("Inventory")) {
+				inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+			}
 
-		int allowedSize = nbt.getInteger("AllowedSize");
-		accessiblePlayers = new ArrayList<>(allowedSize);
-		NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
+			if (nbt.hasKey("StoppedTick")) {
+				setStoppedTick(nbt.getBoolean("StoppedTick"));
+			}
 
-		for (int i = 0; i < playerTags.tagCount(); ++i) {
-			NBTTagCompound playerTag = playerTags.getCompoundTagAt(i);
-			int index = playerTag.getInteger("Index");
-			String name = playerTag.getString("Name");
+			if (nbt.hasKey("AllowedSize") && nbt.hasKey("AllowedPlayers")) {
+				int allowedSize = nbt.getInteger("AllowedSize");
+				accessiblePlayers = new ArrayList<>(allowedSize);
+				NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
 
-			if (index >= 0 && index < allowedSize) {
-				accessiblePlayers.add(index, name);
+				for (int i = 0; i < playerTags.tagCount(); ++i) {
+					NBTTagCompound playerTag = playerTags.getCompoundTagAt(i);
+					int index = playerTag.getInteger("Index");
+					String name = playerTag.getString("Name");
+
+					if (index >= 0 && index < allowedSize) {
+						accessiblePlayers.add(index, name);
+					}
+				}
+			}
+		} else {
+			inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+			setStoppedTick(nbt.getBoolean("StoppedTick"));
+
+			int allowedSize = nbt.getInteger("AllowedSize");
+			accessiblePlayers = new ArrayList<>(allowedSize);
+			NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
+
+			for (int i = 0; i < playerTags.tagCount(); ++i) {
+				NBTTagCompound playerTag = playerTags.getCompoundTagAt(i);
+				int index = playerTag.getInteger("Index");
+				String name = playerTag.getString("Name");
+
+				if (index >= 0 && index < allowedSize) {
+					accessiblePlayers.add(index, name);
+				}
 			}
 		}
 	}
@@ -260,6 +288,7 @@ public abstract class BlockMachine {
 		}
 
 		PROPERTIES.clear();
+		PROPERTIES.setProperty("ConfigVersion", Mantle.VERSION);
 
 		for (BlockMachine machine : MACHINES) {
 			Location location = machine.block.getLocation();
@@ -290,11 +319,32 @@ public abstract class BlockMachine {
 			return;
 		}
 
+		if (PROPERTIES.getProperty("ConfigVersion") == null || !PROPERTIES.getProperty("ConfigVersion").equals(Mantle.VERSION)) {
+			Mantle.instance.getLogger().warning(
+					"Your machines data are detected to be in previous version, there may be some changes in new version!");
+			legacyConfig = true;
+		}
+
 		for (Entry<Object, Object> entry : PROPERTIES.entrySet()) {
 			String loc = (String) entry.getKey();
 			String type = (String) entry.getValue();
 
-			Block block = Utils.deserializeLocation(loc).getBlock();
+			if (StringUtils.isBlank(loc) || StringUtils.isBlank(type)) {
+				continue;
+			}
+
+			Location location = Utils.deserializeLocation(loc);
+
+			if (location == null) {
+				continue;
+			}
+
+			Block block = location.getBlock();
+
+			if (block == null || block.isEmpty()) {
+				continue;
+			}
+
 			BlockMachine machine = null;
 
 			switch (type.toLowerCase()) {
