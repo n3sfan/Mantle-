@@ -42,12 +42,13 @@ public class WateringCanEvent implements Listener {
 		if (Utils.isGrowable(material) || Material.SAPLING.equals(material)) {
 			int growthMask = 0;
 			AreaManager manager = new AreaManager(block, 1, 1, 1, true);
+			manager.scanBlocks();
 
-			if (manager.isAreaEmpty()) {
+			if (manager.noBlocks()) {
 				return;
 			}
 
-			for (Block surrounding : manager) {
+			for (Block surrounding : manager.getScannedBlocks()) {
 				if (surrounding.isEmpty() || !Utils.isGrowable(material) || surrounding.getData() == 7) {
 					continue;
 				}

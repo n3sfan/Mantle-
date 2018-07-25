@@ -1,8 +1,8 @@
-package io.lethinh.github.mantle.command;
-
-import org.bukkit.command.CommandSender;
+package io.lethinh.github.mantle.command.impl;
 
 import io.lethinh.github.mantle.MantleItemStacks;
+import io.lethinh.github.mantle.command.AbstractCommand;
+import io.lethinh.github.mantle.command.ExecutionResult;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
@@ -10,8 +10,8 @@ import io.lethinh.github.mantle.utils.Utils;
  */
 public class ListCommand extends AbstractCommand {
 
-	public ListCommand(CommandSender sender) {
-		super(sender);
+	public ListCommand() {
+		super("list", "Show a list of machines");
 	}
 
 	@Override

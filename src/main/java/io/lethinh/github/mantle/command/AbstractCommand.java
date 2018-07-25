@@ -6,22 +6,25 @@ import org.bukkit.command.CommandSender;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
- * Thanks to Banbeucmas for creating this.
+ * Thanks to Banbeucmas for creating this. I (Nesfan) removed final from
+ * {@code args} and {@code sender}, and added {@code description} in order for
+ * the ease of iteration, see {@link MantleAdminCommands}
  */
 public abstract class AbstractCommand {
 
-	private final String permission;
-	private final String[] args;
-	private final CommandSender sender;
+	private final String name, usage, description, permission;
+	private String[] args;
+	private CommandSender sender;
 
-	public AbstractCommand(CommandSender sender) {
-		this(null, new String[0], sender);
+	public AbstractCommand(String name, String description) {
+		this(name, "", description, null);
 	}
 
-	public AbstractCommand(String permission, String[] args, CommandSender sender) {
+	public AbstractCommand(String name, String usage, String description, String permission) {
+		this.name = name;
+		this.usage = usage;
+		this.description = description;
 		this.permission = permission;
-		this.args = args;
-		this.sender = sender;
 	}
 
 	/**
@@ -41,10 +44,10 @@ public abstract class AbstractCommand {
 			sender.sendMessage(Utils.getColoredString("&4Missing Permission: &c" + permission));
 			break;
 		case NO_PLAYER:
-			sender.sendMessage(Utils.getColoredString("&4Player is not exist or isn't online"));
+			sender.sendMessage(Utils.getColoredString("&4Player isn't exist or isn't online"));
 			break;
 		case CONSOLE_NOT_PERMITTED:
-			sender.sendMessage(Utils.getColoredString("&4This command is not available to console"));
+			sender.sendMessage(Utils.getColoredString("&4This command is not available to the console"));
 			break;
 		default:
 			break;
@@ -52,6 +55,18 @@ public abstract class AbstractCommand {
 	}
 
 	/* Getters */
+	public String getName() {
+		return name;
+	}
+
+	public String getUsage() {
+		return usage;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
 	public String getPermission() {
 		return permission;
 	}
@@ -60,8 +75,16 @@ public abstract class AbstractCommand {
 		return args;
 	}
 
+	public void setArgs(String[] args) {
+		this.args = args;
+	}
+
 	public CommandSender getSender() {
 		return sender;
+	}
+
+	public void setSender(CommandSender sender) {
+		this.sender = sender;
 	}
 
 }

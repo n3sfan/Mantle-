@@ -1,35 +1,36 @@
-package io.lethinh.github.mantle.block;
+package io.lethinh.github.mantle.block.impl;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.block.BlockMachine;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
+import io.lethinh.github.mantle.utils.AreaManager;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
  */
-public class BlockBlockBreaker extends BlockMachine implements Listener {
+public class BlockTreeCutter extends BlockMachine implements Listener {
 
-	// Breaking helper thingy
-	private BlockFace face = BlockFace.NORTH;
+	private int xExpand = 7, yExpand = 30, zExpand = 7;
 	private boolean fancyRender = true;
 
-	public BlockBlockBreaker(Block block, String... players) {
-		super(block, 45, "Block Breaker", players);
+	public BlockTreeCutter(Block block, String... players) {
+		super(block, 45, "Tree Cutter", players);
 
 		// Inventory
 		for (int i = 27; i < 36; ++i) {
@@ -37,43 +38,50 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 		}
 
 		inventory.setItem(36, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 2))
-				.setLocalizedName("North").build());
+				.setLocalizedName("X Expand: " + xExpand).setLore("Left click to increase, right click to decrease")
+				.build());
 		inventory.setItem(37, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 3))
-				.setLocalizedName("South").build());
+				.setLocalizedName("Y Expand: " + yExpand).setLore("Left click to increase, right click to decrease")
+				.build());
 		inventory.setItem(38, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 4))
-				.setLocalizedName("East").build());
-		inventory.setItem(39, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5))
-				.setLocalizedName("West").build());
-		inventory.setItem(40, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 6))
-				.setLocalizedName("Up").build());
-		inventory.setItem(41, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7))
-				.setLocalizedName("Down").build());
-		inventory.setItem(42, new ItemStackFactory(new ItemStack(Material.FEATHER))
-				.setLocalizedName("Fancy Render: " + fancyRender).setLore("Display effects when block is broken")
+				.setLocalizedName("Z Expand: " + zExpand).setLore("Left click to increase, right click to decrease")
+				.build());
+		inventory.setItem(39, new ItemStackFactory(new ItemStack(Material.FEATHER))
+				.setLocalizedName("Fancy Render: " + fancyRender)
+				.setLore("Display effects when block is broken, may be laggy")
 				.build());
 	}
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimer(plugin, DEFAULT_DELAY * 2L, DEFAULT_PERIOD);
+		runnable.runTaskTimer(plugin, 60L, DEFAULT_PERIOD);
 	}
 
 	@Override
 	public void work() {
-		Block surround = block.getRelative(face);
+		AreaManager manager = new AreaManager(block, xExpand, yExpand, zExpand, true,
+				b -> !b.isEmpty() && !b.isLiquid() && !b.getLocation().equals(block.getLocation()));
+		manager.scanBlocks();
 
-		if (surround.isEmpty() || surround.isLiquid()) {
+		if (manager.noBlocks()) {
 			return;
 		}
 
-		if (fancyRender) {
-			@SuppressWarnings("deprecation")
-			int typeId = surround.getTypeId();
-			block.getWorld().playEffect(surround.getLocation(), Effect.STEP_SOUND, typeId);
-		}
+		for (Block surround : manager.getScannedBlocks()) {
+			Material material = surround.getType();
 
-		surround.getDrops().forEach(inventory::addItem);
-		surround.setType(Material.AIR);
+			if (material.equals(Material.LOG) || material.equals(Material.LOG_2)
+					|| material.equals(Material.LEAVES) || material.equals(Material.LEAVES_2)) {
+				if (fancyRender) {
+					@SuppressWarnings("deprecation")
+					int id = material.getId();
+					block.getWorld().playEffect(surround.getLocation(), Effect.STEP_SOUND, id);
+				}
+
+				surround.getDrops().forEach(inventory::addItem);
+				surround.setType(Material.AIR);
+			}
+		}
 	}
 
 	@Override
@@ -85,7 +93,9 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	@Override
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = super.writeToNBT();
-		nbt.setInteger("FaceIndex", face.ordinal());
+		nbt.setInteger("XExpand", xExpand);
+		nbt.setInteger("YExpand", yExpand);
+		nbt.setInteger("ZExpand", zExpand);
 		nbt.setBoolean("FancyRender", fancyRender);
 		return nbt;
 	}
@@ -93,7 +103,9 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		face = BlockFace.values()[nbt.getInteger("FaceIndex")];
+		xExpand = nbt.getInteger("XExpand");
+		yExpand = nbt.getInteger("YExpand");
+		zExpand = nbt.getInteger("ZExpand");
 		fancyRender = nbt.getBoolean("FancyRender");
 	}
 
@@ -128,7 +140,7 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 			return;
 		}
 
-		if (slot == 42) {
+		if (slot == 39) {
 			fancyRender = !fancyRender;
 			event.setCancelled(true);
 			inventory.setItem(slot,
@@ -142,37 +154,50 @@ public class BlockBlockBreaker extends BlockMachine implements Listener {
 			return;
 		}
 
+		ClickType clickType = event.getClick();
+
 		switch (curStack.getDurability()) {
 		case 1:
 			event.setCancelled(true);
 			break;
 		case 2:
-			face = BlockFace.NORTH;
+			xExpand = parse0(xExpand, clickType);
+			inventory.setItem(slot,
+					new ItemStackFactory(inventory.getItem(slot)).setLocalizedName("X Expand: " + xExpand)
+							.build());
 			event.setCancelled(true);
 			break;
 		case 3:
-			face = BlockFace.SOUTH;
+			yExpand = parse0(yExpand, clickType);
+			inventory.setItem(slot,
+					new ItemStackFactory(inventory.getItem(slot)).setLocalizedName("Y Expand: " + yExpand)
+							.build());
 			event.setCancelled(true);
 			break;
 		case 4:
-			face = BlockFace.EAST;
-			event.setCancelled(true);
-			break;
-		case 5:
-			face = BlockFace.WEST;
-			event.setCancelled(true);
-			break;
-		case 6:
-			face = BlockFace.UP;
-			event.setCancelled(true);
-			break;
-		case 7:
-			face = BlockFace.DOWN;
+			zExpand = parse0(zExpand, clickType);
+			inventory.setItem(slot,
+					new ItemStackFactory(inventory.getItem(slot)).setLocalizedName("Z Expand: " + zExpand)
+							.build());
 			event.setCancelled(true);
 			break;
 		default:
 			break;
 		}
+	}
+
+	private static int parse0(int num, ClickType clickType) {
+		if (clickType == ClickType.LEFT) {
+			++num;
+		} else if (clickType == ClickType.SHIFT_LEFT) {
+			num += 10;
+		} else if (clickType == ClickType.RIGHT) {
+			--num;
+		} else if (clickType == ClickType.SHIFT_RIGHT) {
+			num -= 10;
+		}
+
+		return Math.max(0, num);
 	}
 
 }

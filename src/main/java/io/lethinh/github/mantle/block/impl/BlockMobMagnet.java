@@ -1,4 +1,4 @@
-package io.lethinh.github.mantle.block;
+package io.lethinh.github.mantle.block.impl;
 
 import java.util.Collection;
 
@@ -19,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.block.BlockMachine;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
 

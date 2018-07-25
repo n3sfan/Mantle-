@@ -1,4 +1,4 @@
-package io.lethinh.github.mantle.command;
+package io.lethinh.github.mantle.command.impl;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.MantleItemStacks;
+import io.lethinh.github.mantle.command.AbstractCommand;
+import io.lethinh.github.mantle.command.ExecutionResult;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
@@ -14,8 +16,8 @@ import io.lethinh.github.mantle.utils.Utils;
  */
 public class GiveCommand extends AbstractCommand {
 
-	public GiveCommand(String[] args, CommandSender sender) {
-		super(Mantle.PLUGIN_ID + ".give", args, sender);
+	public GiveCommand() {
+		super("give", "<item> <player>", "Give specific item of Mantle plugin to player", Mantle.PLUGIN_ID + ".give");
 	}
 
 	@Override
@@ -51,19 +53,11 @@ public class GiveCommand extends AbstractCommand {
 			if (target == null || !target.isOnline()) {
 				return ExecutionResult.NO_PLAYER;
 			}
-<<<<<<< HEAD
 
 			if (!giveItem(args[1], target)) {
 				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
 			}
 
-=======
-
-			if (!giveItem(args[1], target)) {
-				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
-			}
-
->>>>>>> master
 			return ExecutionResult.DONT_CARE;
 		}
 

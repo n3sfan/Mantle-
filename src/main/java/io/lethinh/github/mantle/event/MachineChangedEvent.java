@@ -3,7 +3,6 @@ package io.lethinh.github.mantle.event;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,15 +12,14 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.MantleItemStacks;
-import io.lethinh.github.mantle.block.BlockBlockBreaker;
-import io.lethinh.github.mantle.block.BlockBlockPlacer;
 import io.lethinh.github.mantle.block.BlockMachine;
-import io.lethinh.github.mantle.block.BlockMobMagnet;
-import io.lethinh.github.mantle.block.BlockTreeCutter;
+import io.lethinh.github.mantle.block.impl.BlockBlockBreaker;
+import io.lethinh.github.mantle.block.impl.BlockBlockPlacer;
+import io.lethinh.github.mantle.block.impl.BlockMobMagnet;
+import io.lethinh.github.mantle.block.impl.BlockTreeCutter;
 
 /**
  * Created by Le Thinh
@@ -33,7 +31,7 @@ public class MachineChangedEvent implements Listener {
 		Player player = event.getPlayer();
 		String name = player.getName();
 		ItemStack heldItem = event.getItemInHand();
-		ItemStack copy = heldItem.clone();
+		// ItemStack copy = heldItem.clone();
 		Block block = event.getBlockPlaced();
 		BlockMachine machine = null;
 
@@ -58,19 +56,16 @@ public class MachineChangedEvent implements Listener {
 				if (machine instanceof Listener) {
 					Bukkit.getServer().getPluginManager().registerEvents((Listener) machine, Mantle.instance);
 				}
-			} else {
-				BlockMachine.MACHINES.remove(machine);
-
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						block.setType(Material.AIR);
-						player.getInventory().addItem(copy);
-						player.sendMessage(ChatColor.RED +
-								"Oops, look like you cannot use this block! Please get higher level or permission.");
-					}
-				}.runTask(Mantle.instance);
-			}
+			} /*
+				 * else { BlockMachine.MACHINES.remove(machine);
+				 *
+				 * new BukkitRunnable() {
+				 *
+				 * @Override public void run() { block.setType(Material.AIR);
+				 * player.getInventory().addItem(copy); player.sendMessage(ChatColor.RED +
+				 * "Oops, look like you cannot use this block! Please get higher level or permission."
+				 * ); } }.runTask(Mantle.instance); }
+				 */
 		}
 	}
 
@@ -115,6 +110,8 @@ public class MachineChangedEvent implements Listener {
 
 					if (machine.canOpen(player)) {
 						player.openInventory(machine.inventory);
+					} else {
+						player.sendMessage(ChatColor.RED + "You cannot open this machine because it is locked!");
 					}
 				});
 	}

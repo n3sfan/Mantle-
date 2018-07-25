@@ -1,5 +1,6 @@
-package io.lethinh.github.mantle.block;
+package io.lethinh.github.mantle.block.impl;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,19 +15,22 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.block.BlockMachine;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
 import io.lethinh.github.mantle.utils.ItemStackFactory;
+import io.lethinh.github.mantle.utils.Utils;
 
 /**
  * Created by Le Thinh
  */
-public class BlockBlockPlacer extends BlockMachine implements Listener {
+public class BlockBlockBreaker extends BlockMachine implements Listener {
 
-	// Placing helper thingy
+	// Breaking helper thingy
 	private BlockFace face = BlockFace.NORTH;
+	private boolean fancyRender = true;
 
-	public BlockBlockPlacer(Block block, String... players) {
-		super(block, 45, "Block Placer", players);
+	public BlockBlockBreaker(Block block, String... players) {
+		super(block, 45, "Block Breaker", players);
 
 		// Inventory
 		for (int i = 27; i < 36; ++i) {
@@ -45,29 +49,37 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 				.setLocalizedName("Up").build());
 		inventory.setItem(41, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7))
 				.setLocalizedName("Down").build());
+		inventory.setItem(42, new ItemStackFactory(new ItemStack(Material.FEATHER))
+				.setLocalizedName("Fancy Render: " + fancyRender).setLore("Display effects when block is broken")
+				.build());
 	}
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+		runnable.runTaskTimer(plugin, DEFAULT_DELAY * 2L, DEFAULT_PERIOD);
 	}
 
 	@Override
 	public void work() {
 		Block surround = block.getRelative(face);
 
-		for (int i = 0; i < getRealSlots(); ++i) {
-			ItemStack content = inventory.getItem(i);
-
-			if (!surround.isEmpty() || content == null || content.getAmount() == 0
-					|| !content.getType().isBlock()) {
-				continue;
-			}
-
-			surround.setType(content.getType());
-			content.setAmount(content.getAmount() - 1);
-			inventory.setItem(i, content);
+		if (surround.isEmpty() || surround.isLiquid()) {
+			return;
 		}
+
+		if (fancyRender) {
+			@SuppressWarnings("deprecation")
+			int typeId = surround.getTypeId();
+			block.getWorld().playEffect(surround.getLocation(), Effect.STEP_SOUND, typeId);
+		}
+
+		surround.getDrops().forEach(inventory::addItem);
+		surround.setType(Material.AIR);
+	}
+
+	@Override
+	public boolean canWork() {
+		return super.canWork() && !Utils.isFull(inventory);
 	}
 
 	/* NBT */
@@ -75,6 +87,7 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound nbt = super.writeToNBT();
 		nbt.setInteger("FaceIndex", face.ordinal());
+		nbt.setBoolean("FancyRender", fancyRender);
 		return nbt;
 	}
 
@@ -82,6 +95,7 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		face = BlockFace.values()[nbt.getInteger("FaceIndex")];
+		fancyRender = nbt.getBoolean("FancyRender");
 	}
 
 	/* Event */
@@ -94,7 +108,6 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 		}
 
 		Block block = event.getClickedBlock();
-
 		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
 				.forEach(machine -> interactPos = block.getLocation());
 	}
@@ -102,6 +115,7 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 	@EventHandler
 	public void onInventoryClicked(InventoryClickEvent event) {
 		Inventory inventory = event.getInventory();
+		int slot = event.getSlot();
 
 		if (!this.inventory.getName().equals(inventory.getName())) {
 			return;
@@ -113,6 +127,14 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 
 		if (event.getSlot() < 27) {
 			return;
+		}
+
+		if (slot == 42) {
+			fancyRender = !fancyRender;
+			event.setCancelled(true);
+			inventory.setItem(slot,
+					new ItemStackFactory(inventory.getItem(slot)).setLocalizedName("Fancy Render: " + fancyRender)
+							.build());
 		}
 
 		ItemStack curStack = event.getCurrentItem();

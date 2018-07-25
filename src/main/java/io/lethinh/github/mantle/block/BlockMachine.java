@@ -24,6 +24,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.Mantle;
+import io.lethinh.github.mantle.block.impl.BlockBlockBreaker;
+import io.lethinh.github.mantle.block.impl.BlockBlockPlacer;
+import io.lethinh.github.mantle.block.impl.BlockMobMagnet;
+import io.lethinh.github.mantle.block.impl.BlockTreeCutter;
 import io.lethinh.github.mantle.nbt.Constants;
 import io.lethinh.github.mantle.nbt.NBTHelper;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
@@ -158,6 +162,7 @@ public abstract class BlockMachine {
 		nbt.setTag("Inventory", Utils.serializeInventory(inventory));
 		nbt.setBoolean("StoppedTick", isStoppedTick());
 
+		nbt.setInteger("AllowedSize", accessiblePlayers.size());
 		NBTTagList playerTags = new NBTTagList();
 
 		for (int i = 0; i < accessiblePlayers.size(); ++i) {
@@ -168,7 +173,6 @@ public abstract class BlockMachine {
 		}
 
 		nbt.setTag("AllowedPlayers", playerTags);
-		nbt.setInteger("AllowedSize", accessiblePlayers.size());
 
 		return nbt;
 	}
@@ -187,7 +191,7 @@ public abstract class BlockMachine {
 			String name = playerTag.getString("Name");
 
 			if (index >= 0 && index < allowedSize) {
-				accessiblePlayers.set(index, name);
+				accessiblePlayers.add(index, name);
 			}
 		}
 	}

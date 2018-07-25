@@ -172,9 +172,8 @@ public final class Utils {
 	/* World */
 	public static boolean isGrowable(Material material) {
 		return material == Material.SOIL || material == Material.CROPS
-				|| material == Material.SEEDS
-				|| material == Material.BEETROOT_SEEDS || material == Material.MELON_SEEDS
-				|| material == Material.PUMPKIN_SEEDS;
+				|| material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
+				|| material == Material.PUMPKIN_STEM;
 	}
 
 	public static boolean areStacksEqualIgnoreDurability(ItemStack stackA, ItemStack stackB) {
