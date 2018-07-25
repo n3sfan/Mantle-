@@ -176,7 +176,11 @@ public final class Utils {
 	/* World */
 	public static boolean isGrowable(Material material) {
 		return material == Material.SOIL || material == Material.CROPS || material == Material.SEEDS
+<<<<<<< HEAD
 				|| material == Material.CARROT || material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
+=======
+				|| material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
+>>>>>>> master
 				|| material == Material.PUMPKIN_STEM;
 	}
 
