@@ -75,7 +75,7 @@ public abstract class AbstractCommand {
 		return args;
 	}
 
-	public void setArgs(String[] args) {
+	public void setArgs(String... args) {
 		this.args = args;
 	}
 

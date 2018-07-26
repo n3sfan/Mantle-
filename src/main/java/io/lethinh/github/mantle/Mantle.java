@@ -3,7 +3,13 @@ package io.lethinh.github.mantle;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import io.lethinh.github.mantle.block.BlockMachine;
 import io.lethinh.github.mantle.loader.CommandLoader;
@@ -59,16 +65,50 @@ public class Mantle extends JavaPlugin {
 			logger.warning("An error occured while loading machines or their inventories data!");
 		}
 
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() {
-//				if (BlockMachine.MACHINES.isEmpty()) {
-//					return;
-//				}
-//
-//				BlockMachine.MACHINES.forEach(machine -> machine.tick(Mantle.this));
-//			}
-//		}.runTaskTimerAsynchronously(this, 20L, 20L);
+		// Item Magnet
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				for (Player player : getServer().getOnlinePlayers()) {
+					PlayerInventory inventory = player.getInventory();
+
+					if (inventory.getItemInMainHand() != null && inventory.getItemInMainHand().getItemMeta() != null
+							&& MantleItemStacks.ITEM_MAGNET.getItemMeta().getLocalizedName()
+									.equals(inventory.getItemInMainHand().getItemMeta().getLocalizedName())) {
+						if (inventory.getItemInMainHand().getItemMeta().getDisplayName().contains("Disabled")) {
+							continue;
+						}
+
+						for (Entity entity : player.getNearbyEntities(5D, 5D, 5D)) {
+							if (entity.isDead() || !(entity instanceof Item)) {
+								continue;
+							}
+
+							Item item = (Item) entity;
+							item.setPickupDelay(0);
+							item.teleport(player, TeleportCause.PLUGIN);
+						}
+					} else if (inventory.getItemInOffHand() != null
+							&& inventory.getItemInOffHand().getItemMeta() != null
+							&& MantleItemStacks.ITEM_MAGNET.getItemMeta().getLocalizedName()
+									.equals(inventory.getItemInOffHand().getItemMeta().getLocalizedName())) {
+						if (inventory.getItemInOffHand().getItemMeta().getDisplayName().contains("Disabled")) {
+							continue;
+						}
+
+						for (Entity entity : player.getNearbyEntities(5D, 5D, 5D)) {
+							if (entity.isDead() || !(entity instanceof Item)) {
+								continue;
+							}
+
+							Item item = (Item) entity;
+							item.setPickupDelay(0);
+							item.teleport(player, TeleportCause.PLUGIN);
+						}
+					}
+				}
+			}
+		}.runTaskTimerAsynchronously(this, 20L, 10L);
 
 		logger.info("Mantle is loaded!");
 	}

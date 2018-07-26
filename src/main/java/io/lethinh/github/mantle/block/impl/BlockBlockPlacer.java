@@ -53,6 +53,7 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 		runnable.runTaskTimer(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void work() {
 		Block surround = block.getRelative(face);
@@ -66,6 +67,7 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 			}
 
 			surround.setType(content.getType());
+			surround.setData(content.getData().getData());
 			content.setAmount(content.getAmount() - 1);
 			inventory.setItem(i, content);
 		}

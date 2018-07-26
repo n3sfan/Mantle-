@@ -16,7 +16,7 @@ public class ListCommand extends AbstractCommand {
 
 	@Override
 	public ExecutionResult now() {
-		getSender().sendMessage(Utils.getColoredString("&5Available machines: "));
+		getSender().sendMessage(Utils.getColoredString("&5Available machines and items: "));
 		MantleItemStacks.STACKS.forEach(stack -> getSender().sendMessage(stack.getItemMeta().getDisplayName()));
 		return ExecutionResult.DONT_CARE;
 	}

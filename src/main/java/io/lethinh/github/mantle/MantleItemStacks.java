@@ -21,6 +21,7 @@ public class MantleItemStacks {
 	// Items
 	public static final ItemStack WATERING_CAN;
 	public static final ItemStack BEDROCK_BREAKER;
+	public static final ItemStack ITEM_MAGNET;
 
 	// Blocks
 	public static final ItemStack TREE_CUTTER;
@@ -47,6 +48,16 @@ public class MantleItemStacks {
 				.setLore("Break the unbreakable in a flash").build();
 
 		STACKS.add(BEDROCK_BREAKER);
+
+		// Item Magnet
+		ITEM_MAGNET = new ItemStackFactory(new ItemStack(Material.IRON_INGOT))
+				.addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS)
+				.addEnchant(Enchantment.SWEEPING_EDGE, 10).setLocalizedName(Mantle.PLUGIN_ID + "_item_magnet")
+				.setDisplayName(ChatColor.BLUE + "Item Magnet " + ChatColor.DARK_RED + "(Disabled)")
+				.setLore("Right click to air and sneak to toggle", "Pull all items towards you within 5 blocks range")
+				.build();
+
+		STACKS.add(ITEM_MAGNET);
 
 		// Tree Cutter
 		TREE_CUTTER = new ItemStackFactory(new ItemStack(Material.DISPENSER))
