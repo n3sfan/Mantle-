@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.NumberConversions;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.block.impl.BlockBlockBreaker;
@@ -139,6 +141,10 @@ public abstract class BlockMachine {
 	}
 
 	public boolean canOpen(Player player) {
+		if (accessiblePlayers.isEmpty()) {
+			return accessiblePlayers.add(player.getName());
+		}
+
 		return accessiblePlayers.stream().anyMatch(p -> p.equals(player.getName()));
 	}
 
@@ -251,12 +257,6 @@ public abstract class BlockMachine {
 
 		for (BlockMachine save : MACHINES) {
 			Location location = save.block.getLocation();
-			String invName = PROPERTIES.getProperty(Utils.serializeLocation(location));
-
-			if (StringUtils.isBlank(invName)) {
-				continue;
-			}
-
 			File out = new File(dir, Utils.serializeLocation(location));
 			NBTHelper.safeWrite(save.writeToNBT(), out);
 		}
@@ -328,9 +328,11 @@ public abstract class BlockMachine {
 			return;
 		}
 
+		Logger logger = Mantle.instance.getLogger();
+
 		if (StringUtils.isBlank(PROPERTIES.getProperty("ConfigVersion"))
 				|| !PROPERTIES.getProperty("ConfigVersion").equals(Mantle.VERSION)) {
-			Mantle.instance.getLogger().warning(
+			logger.warning(
 					"Your machines data are detected to be in previous version, there may be some changes in new version!");
 			legacyConfig = true;
 		}
@@ -344,6 +346,16 @@ public abstract class BlockMachine {
 			}
 
 			Location location = Utils.deserializeLocation(loc);
+
+			if (legacyConfig && location == null) {
+				try {
+					String[] split = loc.split("_");
+					location = new Location(Bukkit.getWorld(split[0]), NumberConversions.toInt(split[1]),
+							NumberConversions.toInt(split[2]), NumberConversions.toInt(split[3]));
+				} catch (Throwable t) {
+					logger.warning(loc + " was failed to deserialize!");
+				}
+			}
 
 			if (location == null) {
 				continue;

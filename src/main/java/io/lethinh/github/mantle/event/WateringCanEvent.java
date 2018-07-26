@@ -31,7 +31,7 @@ public class WateringCanEvent implements Listener {
 			return;
 		}
 
-		if (!Utils.areStacksEqualIgnoreDurability(MantleItemStacks.WATERING_CAN, heldItem)) {
+		if (!Utils.areStacksEqualIgnoreDurabilityAndAmount(MantleItemStacks.WATERING_CAN, heldItem)) {
 			return;
 		}
 

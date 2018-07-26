@@ -163,13 +163,18 @@ public final class Utils {
 	}
 
 	public static String serializeLocation(Location location) {
-		return location.getWorld().getName() + "_" + location.getBlockX() + "_" + location.getBlockY() + "_"
+		return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
 				+ location.getBlockZ();
 	}
 
 	public static Location deserializeLocation(String serialization) {
 		try {
-			String[] split = serialization.split("_");
+			String[] split = serialization.split(",");
+
+			if (split.length == 0) {
+				return null;
+			}
+
 			return new Location(Bukkit.getWorld(split[0]), NumberConversions.toInt(split[1]),
 					NumberConversions.toInt(split[2]), NumberConversions.toInt(split[3]));
 		} catch (Throwable t) {
@@ -185,7 +190,7 @@ public final class Utils {
 				|| material == Material.PUMPKIN_STEM;
 	}
 
-	public static boolean areStacksEqualIgnoreDurability(ItemStack stackA, ItemStack stackB) {
+	public static boolean areStacksEqualIgnoreDurabilityAndAmount(ItemStack stackA, ItemStack stackB) {
 		return stackA != null && stackB != null && stackA.getType() == stackB.getType() && stackA.hasItemMeta()
 				&& stackB.hasItemMeta() && Bukkit.getItemFactory().equals(stackA.getItemMeta(), stackB.getItemMeta());
 	}
