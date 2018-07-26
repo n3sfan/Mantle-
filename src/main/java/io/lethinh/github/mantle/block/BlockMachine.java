@@ -182,7 +182,11 @@ public abstract class BlockMachine {
 	public void readFromNBT(NBTTagCompound nbt) {
 		if (legacyConfig) {
 			if (nbt.hasKey("Inventory")) {
-				inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+				Inventory to = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+
+				if (to != null) {
+					inventory = to;
+				}
 			}
 
 			if (nbt.hasKey("StoppedTick")) {
@@ -205,7 +209,12 @@ public abstract class BlockMachine {
 				}
 			}
 		} else {
-			inventory = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+			Inventory to = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
+
+			if (to != null) {
+				inventory = to;
+			}
+
 			setStoppedTick(nbt.getBoolean("StoppedTick"));
 
 			int allowedSize = nbt.getInteger("AllowedSize");
@@ -319,7 +328,8 @@ public abstract class BlockMachine {
 			return;
 		}
 
-		if (PROPERTIES.getProperty("ConfigVersion") == null || !PROPERTIES.getProperty("ConfigVersion").equals(Mantle.VERSION)) {
+		if (StringUtils.isBlank(PROPERTIES.getProperty("ConfigVersion"))
+				|| !PROPERTIES.getProperty("ConfigVersion").equals(Mantle.VERSION)) {
 			Mantle.instance.getLogger().warning(
 					"Your machines data are detected to be in previous version, there may be some changes in new version!");
 			legacyConfig = true;

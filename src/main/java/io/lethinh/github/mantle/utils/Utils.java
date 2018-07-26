@@ -143,19 +143,23 @@ public final class Utils {
 	}
 
 	public static Inventory deserializeInventory(NBTTagCompound nbt) {
-		Inventory inventory = Bukkit.createInventory(null, nbt.getInteger("Size"), nbt.getString("Title"));
-		NBTTagList tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
+		try {
+			Inventory inventory = Bukkit.createInventory(null, nbt.getInteger("Size"), nbt.getString("Title"));
+			NBTTagList tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
 
-		for (int i = 0; i < tagList.tagCount(); ++i) {
-			NBTTagCompound itemTags = tagList.getCompoundTagAt(i);
-			int slot = itemTags.getInteger("Slot");
+			for (int i = 0; i < tagList.tagCount(); ++i) {
+				NBTTagCompound itemTags = tagList.getCompoundTagAt(i);
+				int slot = itemTags.getInteger("Slot");
 
-			if (slot >= 0 && slot < inventory.getSize()) {
-				inventory.setItem(slot, readStackFromNBT(itemTags));
+				if (slot >= 0 && slot < inventory.getSize()) {
+					inventory.setItem(slot, readStackFromNBT(itemTags));
+				}
 			}
-		}
 
-		return inventory;
+			return inventory;
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 
 	public static String serializeLocation(Location location) {
@@ -176,11 +180,8 @@ public final class Utils {
 	/* World */
 	public static boolean isGrowable(Material material) {
 		return material == Material.SOIL || material == Material.CROPS || material == Material.SEEDS
-<<<<<<< HEAD
 				|| material == Material.CARROT || material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
-=======
 				|| material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM
->>>>>>> master
 				|| material == Material.PUMPKIN_STEM;
 	}
 
