@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
 /**
@@ -39,22 +40,24 @@ public class AreaManager {
 			Location location = center.getLocation();
 			String loc = "World: " + location.getWorld().getName() + ", X:" + location.getX() + ", Y:" + location.getY()
 					+ ", Z:" + location.getZ();
-			Bukkit.broadcastMessage(ChatColor.DARK_RED + "At: " + loc + " .Invalid area, cannot be scanned!");
+			Bukkit.broadcastMessage(ChatColor.DARK_RED + "At: " + loc + " . Invalid area, cannot be scanned!");
 			return;
 		}
 
-		for (int x = -xRange; x <= xRange; ++x) {
-			for (int z = -zRange; z <= zRange; ++z) {
+		World world = center.getWorld();
+
+		for (int x = center.getX() - xRange; x <= center.getX() + xRange; ++x) {
+			for (int z = center.getZ() - zRange; z <= center.getZ() + zRange; ++z) {
 				if (scanY) {
-					for (int y = 0; y <= yRange; ++y) {
-						Block neighborBlock = center.getRelative(x, y, z);
+					for (int y = center.getY(); y < yRange * 2 + 1; ++y) {
+						Block neighborBlock = world.getBlockAt(x, y, z);
 
 						if (predicate == null || predicate.test(neighborBlock)) {
 							scannedBlocks.add(neighborBlock);
 						}
 					}
 				} else {
-					Block neighborBlock = center.getRelative(x, 0, z);
+					Block neighborBlock = world.getBlockAt(x, center.getY(), z);
 
 					if (predicate == null || predicate.test(neighborBlock)) {
 						scannedBlocks.add(neighborBlock);

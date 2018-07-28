@@ -29,6 +29,8 @@ public class MantleItemStacks {
 	public static final ItemStack BLOCK_BREAKER;
 	public static final ItemStack BLOCK_PLACER;
 	public static final ItemStack MOB_MAGNET;
+	public static final ItemStack SMELTERY_BLOCK;
+	public static final ItemStack SMELTERY_CONTROLLER;
 
 	static {
 		// Watering Can
@@ -104,6 +106,21 @@ public class MantleItemStacks {
 				.build();
 
 		STACKS.add(MOB_MAGNET);
+
+		// Smeltery Block
+		SMELTERY_BLOCK = new ItemStackFactory(new ItemStack(Material.NETHER_BRICK))
+				.addEnchant(Enchantment.FIRE_ASPECT, 10).setLocalizedName(Mantle.PLUGIN_ID + "_smeltery_block")
+				.setDisplayName(ChatColor.DARK_GRAY + "Smeltery Block").build();
+
+		STACKS.add(SMELTERY_BLOCK);
+
+		// Smeltery Controller
+		SMELTERY_CONTROLLER = new ItemStackFactory(new ItemStack(Material.OBSERVER)).addEnchant(Enchantment.LUCK, 10)
+				.setLocalizedName(Mantle.PLUGIN_ID + "_smeltery_controller")
+				.setDisplayName(ChatColor.DARK_RED + "Smeltery Controller")
+				.build();
+
+		STACKS.add(SMELTERY_CONTROLLER);
 	}
 
 }

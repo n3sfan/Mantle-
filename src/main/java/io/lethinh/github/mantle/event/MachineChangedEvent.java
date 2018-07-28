@@ -6,6 +6,7 @@ import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -26,7 +27,7 @@ import io.lethinh.github.mantle.block.impl.BlockTreeCutter;
  */
 public class MachineChangedEvent implements Listener {
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		String name = player.getName();
@@ -69,7 +70,7 @@ public class MachineChangedEvent implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockBroken(BlockBreakEvent event) {
 		Block block = event.getBlock();
 		Player player = event.getPlayer();

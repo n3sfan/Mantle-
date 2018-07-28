@@ -141,6 +141,10 @@ public abstract class BlockMachine {
 	}
 
 	public boolean canOpen(Player player) {
+		if (inventory == null || inventory.getSize() == 0) {
+			return false;
+		}
+
 		if (accessiblePlayers.isEmpty()) {
 			return accessiblePlayers.add(player.getName());
 		}

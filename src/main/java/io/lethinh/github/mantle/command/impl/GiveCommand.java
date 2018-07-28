@@ -9,6 +9,7 @@ import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.MantleItemStacks;
 import io.lethinh.github.mantle.command.AbstractCommand;
 import io.lethinh.github.mantle.command.ExecutionResult;
+import io.lethinh.github.mantle.utils.ItemStackFactory;
 import io.lethinh.github.mantle.utils.Utils;
 
 /**
@@ -17,7 +18,8 @@ import io.lethinh.github.mantle.utils.Utils;
 public class GiveCommand extends AbstractCommand {
 
 	public GiveCommand() {
-		super("give", "<item> <player>", "Give specific item of Mantle plugin to player", Mantle.PLUGIN_ID + ".give");
+		super("give", "<item> <amount> <player>", "Give specific quantity of items of Mantle plugin to player",
+				Mantle.PLUGIN_ID + ".give");
 	}
 
 	@Override
@@ -33,44 +35,57 @@ public class GiveCommand extends AbstractCommand {
 			return ExecutionResult.MISSING_ARGS;
 		}
 
-		String name = args[0];
+		// Nesfan edit starts
+		String item = args[0];
+		int amount = 1;
+		Player player = null;
 
-		if (args.length == 1) {
+		try {
+			amount = Integer.parseInt(args[1]);
+			player = Bukkit.getPlayerExact(args[2]);
+		} catch (Throwable e) {
+			amount = 1;
+		}
+
+		if (amount > 64) {
+			sender.sendMessage("Amount cannot be greater than 64!");
+			return ExecutionResult.DONT_CARE;
+		}
+
+		if (player == null) {
 			if (!(sender instanceof Player)) {
 				return ExecutionResult.CONSOLE_NOT_PERMITTED;
 			}
 
 			Player target = (Player) sender;
 
-			if (!giveItem(name, target)) {
-				sender.sendMessage(Utils.getColoredString("&cItem &4" + name + "wasn't found"));
+			if (!giveItem(item, amount, sender, target)) {
+				sender.sendMessage(Utils.getColoredString("&cItem &4" + item + " wasn't found"));
 			}
 
 			return ExecutionResult.DONT_CARE;
-		} else if (args.length == 2) {
-			Player target = Bukkit.getPlayer(name);
-
-			if (target == null || !target.isOnline()) {
+		} else {
+			if (player == null || !player.isOnline()) {
 				return ExecutionResult.NO_PLAYER;
 			}
 
-			if (!giveItem(args[1], target)) {
-				sender.sendMessage(Utils.getColoredString("&cItem &4" + args[1] + "wasn't found"));
+			if (!giveItem(item, amount, sender, player)) {
+				sender.sendMessage(Utils.getColoredString("&cItem &4" + item + " wasn't found"));
 			}
-
-			return ExecutionResult.DONT_CARE;
 		}
 
+		// End
 		return ExecutionResult.DONT_CARE;
 	}
 
-	private boolean giveItem(String item, Player target) {
+	// Edited by Nesfan to make this method work more efficiently
+	private static boolean giveItem(String item, int amount, CommandSender sender, Player target) {
 		for (ItemStack stack : MantleItemStacks.STACKS) {
 			String name = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
 
 			if (name.equalsIgnoreCase(item)) {
-				target.getInventory().addItem(stack);
-				target.sendMessage("Gave " + target.getName() + " " + stack.getItemMeta().getDisplayName());
+				target.getInventory().addItem(new ItemStackFactory(stack).setAmount(amount).build());
+				sender.sendMessage("Gave " + target.getName() + " " + stack.getItemMeta().getDisplayName());
 				return true;
 			}
 		}

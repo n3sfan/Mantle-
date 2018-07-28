@@ -33,7 +33,7 @@ public class AllowCommand extends AbstractCommand {
 		}
 
 		String target = args[0];
-		Player check = Bukkit.getPlayer(target);
+		Player check = Bukkit.getPlayerExact(target);
 
 		if (check == null || !check.isOnline()) {
 			return ExecutionResult.NO_PLAYER;

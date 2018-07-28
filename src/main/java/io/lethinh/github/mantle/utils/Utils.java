@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
@@ -183,6 +184,12 @@ public final class Utils {
 	}
 
 	/* World */
+	@SuppressWarnings("deprecation")
+	public static boolean isBlockEqualStack(Block block, ItemStack stack) {
+		return block != null && !block.isEmpty() && stack != null && stack.getAmount() > 0
+				&& block.getType() == stack.getType() && block.getData() == stack.getData().getData();
+	}
+
 	public static boolean isGrowable(Material material) {
 		return material == Material.SOIL || material == Material.CROPS || material == Material.SEEDS
 				|| material == Material.CARROT || material == Material.BEETROOT_BLOCK || material == Material.MELON_STEM

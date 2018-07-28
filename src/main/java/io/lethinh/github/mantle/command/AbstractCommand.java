@@ -37,7 +37,6 @@ public abstract class AbstractCommand {
 		case DONT_CARE:
 			break;
 		case MISSING_ARGS:
-			// TODO Do stuff
 			sender.sendMessage(ChatColor.DARK_RED + "Not enough command arguments!");
 			break;
 		case NO_PERMISSION:
