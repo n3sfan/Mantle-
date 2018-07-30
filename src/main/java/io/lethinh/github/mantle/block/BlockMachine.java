@@ -19,8 +19,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.NumberConversions;
@@ -29,7 +32,10 @@ import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.block.impl.BlockBlockBreaker;
 import io.lethinh.github.mantle.block.impl.BlockBlockPlacer;
 import io.lethinh.github.mantle.block.impl.BlockMobMagnet;
+import io.lethinh.github.mantle.block.impl.BlockTeleportReceiver;
+import io.lethinh.github.mantle.block.impl.BlockTeleportTransmitter;
 import io.lethinh.github.mantle.block.impl.BlockTreeCutter;
+import io.lethinh.github.mantle.multiblock.smeltery.BlockSmelteryController;
 import io.lethinh.github.mantle.nbt.Constants;
 import io.lethinh.github.mantle.nbt.NBTHelper;
 import io.lethinh.github.mantle.nbt.NBTTagCompound;
@@ -44,7 +50,7 @@ public abstract class BlockMachine {
 	/* Static Members */
 	public static final CopyOnWriteArrayList<BlockMachine> MACHINES = new CopyOnWriteArrayList<>();
 	public static final Properties PROPERTIES = new Properties();
-	protected static final long DEFAULT_DELAY = 20L, DEFAULT_PERIOD = 10L;
+	protected static final long DEFAULT_DELAY = 0x14, DEFAULT_PERIOD = 0xa;
 	private static boolean legacyConfig = false;
 
 	/* Instance Members */
@@ -52,6 +58,7 @@ public abstract class BlockMachine {
 	public Inventory inventory;
 	public final BukkitRunnable runnable;
 	public List<String> accessiblePlayers;
+	public final List<Player> usingPlayers;
 
 	/* Default constructor */
 	public BlockMachine(Block block, int invSlots, String invName, String... players) {
@@ -67,6 +74,7 @@ public abstract class BlockMachine {
 			accessiblePlayers.add(player);
 		}
 
+		this.usingPlayers = new ArrayList<>();
 		this.inventory = inventory;
 		this.runnable = new BukkitRunnable() {
 			@Override
@@ -134,17 +142,15 @@ public abstract class BlockMachine {
 		return !stoppedTick;
 	}
 
-	public boolean canPlace(Player player) {
-		// return player.getName().equals("Nesfan") ||
-		// player.hasPermission(Mantle.PLUGIN_ID + ".place." + inventory.getName());
-		return true;
-	}
-
 	public boolean canOpen(Player player) {
-		if (inventory == null || inventory.getSize() == 0) {
-			return false;
+		if (accessiblePlayers.isEmpty()) {
+			return accessiblePlayers.add(player.getName());
 		}
 
+		return accessiblePlayers.stream().anyMatch(p -> p.equals(player.getName()));
+	}
+
+	public boolean canBreak(Player player) {
 		if (accessiblePlayers.isEmpty()) {
 			return accessiblePlayers.add(player.getName());
 		}
@@ -154,6 +160,19 @@ public abstract class BlockMachine {
 
 	public String getName() {
 		return inventory.getTitle().replace(' ', '_');
+	}
+
+	/* Callbacks */
+	public void onMachinePlaced(Player player, ItemStack heldItem) {
+		setStoppedTick(false);
+	}
+
+	public void onMachineBroken(Player player) {
+	}
+
+	public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
+			ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+		return false;
 	}
 
 	/* Object */
@@ -190,43 +209,19 @@ public abstract class BlockMachine {
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
-		if (legacyConfig) {
-			if (nbt.hasKey("Inventory")) {
-				Inventory to = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
-
-				if (to != null) {
-					inventory = to;
-				}
-			}
-
-			if (nbt.hasKey("StoppedTick")) {
-				setStoppedTick(nbt.getBoolean("StoppedTick"));
-			}
-
-			if (nbt.hasKey("AllowedSize") && nbt.hasKey("AllowedPlayers")) {
-				int allowedSize = nbt.getInteger("AllowedSize");
-				accessiblePlayers = new ArrayList<>(allowedSize);
-				NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
-
-				for (int i = 0; i < playerTags.tagCount(); ++i) {
-					NBTTagCompound playerTag = playerTags.getCompoundTagAt(i);
-					int index = playerTag.getInteger("Index");
-					String name = playerTag.getString("Name");
-
-					if (index >= 0 && index < allowedSize) {
-						accessiblePlayers.add(index, name);
-					}
-				}
-			}
-		} else {
+		if (nbt.hasKey("Inventory")) {
 			Inventory to = Utils.deserializeInventory(nbt.getCompoundTag("Inventory"));
 
 			if (to != null) {
 				inventory = to;
 			}
+		}
 
+		if (nbt.hasKey("StoppedTick")) {
 			setStoppedTick(nbt.getBoolean("StoppedTick"));
+		}
 
+		if (nbt.hasKey("AllowedSize") && nbt.hasKey("AllowedPlayers")) {
 			int allowedSize = nbt.getInteger("AllowedSize");
 			accessiblePlayers = new ArrayList<>(allowedSize);
 			NBTTagList playerTags = nbt.getTagList("AllowedPlayers", Constants.NBT.TAG_COMPOUND);
@@ -260,9 +255,15 @@ public abstract class BlockMachine {
 		}
 
 		for (BlockMachine save : MACHINES) {
+			NBTTagCompound nbt = save.writeToNBT();
+
+			if (nbt.hasNoTags()) {
+				continue;
+			}
+
 			Location location = save.block.getLocation();
 			File out = new File(dir, Utils.serializeLocation(location));
-			NBTHelper.safeWrite(save.writeToNBT(), out);
+			NBTHelper.safeWrite(nbt, out);
 		}
 	}
 
@@ -336,8 +337,7 @@ public abstract class BlockMachine {
 
 		if (StringUtils.isBlank(PROPERTIES.getProperty("ConfigVersion"))
 				|| !PROPERTIES.getProperty("ConfigVersion").equals(Mantle.VERSION)) {
-			logger.warning(
-					"Your machines data are detected to be in previous version, there may be some changes in new version!");
+			logger.warning("Your machines data are detected to be in previous version. Activating Parser...");
 			legacyConfig = true;
 		}
 
@@ -371,28 +371,31 @@ public abstract class BlockMachine {
 				continue;
 			}
 
-			BlockMachine machine = null;
-
 			switch (type.toLowerCase()) {
 			case "tree_cutter":
-				BlockMachine.MACHINES.add(machine = new BlockTreeCutter(block));
+				BlockMachine.MACHINES.add(new BlockTreeCutter(block));
 				break;
 //			case "planter":
 //				BlockMachine.MACHINES.add(machine = new BlockPlanter(block));
 //				break;
 			case "block_breaker":
-				BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block));
+				BlockMachine.MACHINES.add(new BlockBlockBreaker(block));
 				break;
 			case "block_placer":
-				BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block));
+				BlockMachine.MACHINES.add(new BlockBlockPlacer(block));
 				break;
 			case "mob_magnet":
-				BlockMachine.MACHINES.add(machine = new BlockMobMagnet(block));
+				BlockMachine.MACHINES.add(new BlockMobMagnet(block));
 				break;
-			}
-
-			if (machine != null && machine instanceof Listener) {
-				Bukkit.getServer().getPluginManager().registerEvents((Listener) machine, Mantle.instance);
+			case "smeltery_controller":
+				BlockMachine.MACHINES.add(new BlockSmelteryController(block));
+				break;
+			case "teleport_receiver":
+				BlockMachine.MACHINES.add(new BlockTeleportReceiver(block));
+				break;
+			case "teleport_transmitter":
+				BlockMachine.MACHINES.add(new BlockTeleportTransmitter(block));
+				break;
 			}
 		}
 	}

@@ -1,10 +1,12 @@
 package io.lethinh.github.mantle.multiblock;
 
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import io.lethinh.github.mantle.Mantle;
 import io.lethinh.github.mantle.block.BlockMachine;
+import io.lethinh.github.mantle.nbt.NBTTagCompound;
 
 /**
  * Created by Le Thinh
@@ -20,7 +22,7 @@ public class MultiBlockPart<T extends MultiBlockTracker> extends BlockMachine im
 
 	@Override
 	public void handleUpdate(Mantle plugin) {
-
+		runnable.runTaskTimerAsynchronously(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
 	}
 
 	@Override
@@ -33,30 +35,24 @@ public class MultiBlockPart<T extends MultiBlockTracker> extends BlockMachine im
 		inventory = controller.inventory;
 	}
 
+	@Override
+	public boolean canOpen(Player player) {
+		return !hasController || controller == null || controller.canOpen(player);
+	}
+
+	@Override
+	public boolean canBreak(Player player) {
+		return !hasController || controller == null || controller.canBreak(player);
+	}
+
 	/* NBT */
-//	@Override
-//	public NBTTagCompound writeToNBT() {
-//		NBTTagCompound nbt = super.writeToNBT();
-//		nbt.setBoolean("HasController", hasController);
-//		nbt.setString("ControllerLoc", Utils.serializeLocation(controller.block.getLocation()));
-//		return nbt;
-//	}
-//
-//	@SuppressWarnings("unchecked")
-//	@Override
-//	public void readFromNBT(NBTTagCompound nbt) {
-//		hasController = nbt.getBoolean("HasController");
-//		Location location = Utils.deserializeLocation(nbt.getString("ControllerLoc"));
-//
-//		for (BlockMachine machine : BlockMachine.MACHINES) {
-//			if (!(machine instanceof MultiBlockMachine) || !machine.block.getLocation().equals(location)) {
-//				continue;
-//			}
-//
-//			controller = (MultiBlockMachine<T>) machine;
-//		}
-//
-//		super.readFromNBT(nbt);
-//	}
+	@Override
+	public NBTTagCompound writeToNBT() {
+		return new NBTTagCompound();
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+	}
 
 }

@@ -1,16 +1,12 @@
 package io.lethinh.github.mantle.block.impl;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import io.lethinh.github.mantle.Mantle;
@@ -21,10 +17,10 @@ import io.lethinh.github.mantle.utils.ItemStackFactory;
 /**
  * Created by Le Thinh
  */
-public class BlockBlockPlacer extends BlockMachine implements Listener {
+public class BlockBlockPlacer extends BlockMachine {
 
 	// Placing helper thingy
-	private BlockFace face = BlockFace.NORTH;
+	private BlockFace face = BlockFace.SELF;
 
 	public BlockBlockPlacer(Block block, String... players) {
 		super(block, 45, "Block Placer", players);
@@ -58,6 +54,10 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 	public void work() {
 		Block surround = block.getRelative(face);
 
+		if (surround.getLocation().equals(block.getLocation())) {
+			return;
+		}
+
 		for (int i = 0; i < getRealSlots(); ++i) {
 			ItemStack content = inventory.getItem(i);
 
@@ -87,73 +87,41 @@ public class BlockBlockPlacer extends BlockMachine implements Listener {
 		face = BlockFace.values()[nbt.getInteger("FaceIndex")];
 	}
 
-	/* Event */
-	private Location interactPos;
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockOpened(PlayerInteractEvent event) {
-		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-			return;
+	/* Callback */
+	@Override
+	public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
+			ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+		if (slot < 27) {
+			return false;
 		}
 
-		Block block = event.getClickedBlock();
-
-		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
-				.forEach(machine -> interactPos = block.getLocation());
-	}
-
-	@EventHandler
-	public void onInventoryClicked(InventoryClickEvent event) {
-		Inventory inventory = event.getInventory();
-
-		if (!this.inventory.getName().equals(inventory.getName())) {
-			return;
+		if (clicked == null || clicked.getAmount() == 0 || Material.STAINED_GLASS_PANE != clicked.getType()) {
+			return false;
 		}
 
-		if (!block.getLocation().equals(interactPos)) {
-			return;
-		}
-
-		if (event.getSlot() < 27) {
-			return;
-		}
-
-		ItemStack curStack = event.getCurrentItem();
-
-		if (curStack == null || curStack.getAmount() == 0 || Material.STAINED_GLASS_PANE != curStack.getType()) {
-			return;
-		}
-
-		switch (curStack.getDurability()) {
+		switch (clicked.getDurability()) {
 		case 1:
-			event.setCancelled(true);
-			break;
+			return true;
 		case 2:
 			face = BlockFace.NORTH;
-			event.setCancelled(true);
-			break;
+			return true;
 		case 3:
 			face = BlockFace.SOUTH;
-			event.setCancelled(true);
-			break;
+			return true;
 		case 4:
 			face = BlockFace.EAST;
-			event.setCancelled(true);
-			break;
+			return true;
 		case 5:
 			face = BlockFace.WEST;
-			event.setCancelled(true);
-			break;
+			return true;
 		case 6:
 			face = BlockFace.UP;
-			event.setCancelled(true);
-			break;
+			return true;
 		case 7:
 			face = BlockFace.DOWN;
-			event.setCancelled(true);
-			break;
+			return true;
 		default:
-			break;
+			return false;
 		}
 	}
 

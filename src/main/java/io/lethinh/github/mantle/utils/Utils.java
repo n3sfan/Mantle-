@@ -14,6 +14,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -184,6 +185,29 @@ public final class Utils {
 	}
 
 	/* World */
+	public static BlockFace getBlockFaceFromPlayer(Location loc, Player player) {
+		Location playerLoc = player.getLocation();
+
+		// Check for vertical faces
+		if (Math.abs(playerLoc.getX() - (loc.getX() + 0.5D)) < 2D
+				&& Math.abs(playerLoc.getZ() - (loc.getZ() + 0.5D)) < 2D) {
+			double eyesPos = playerLoc.getY() + player.getEyeHeight();
+
+			if (eyesPos - loc.getY() > 2D) {
+				return BlockFace.UP;
+			}
+
+			if (loc.getY() - eyesPos > 0D) {
+				return BlockFace.DOWN;
+			}
+		}
+
+		// Or horizontal faces
+		BlockFace[] horizontals = new BlockFace[] { BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH, BlockFace.EAST };
+		int index = NumberConversions.floor(playerLoc.getYaw() * 4F / 360F + 0.5D) & 3;
+		return horizontals[Math.abs(index % horizontals.length)].getOppositeFace();
+	}
+
 	@SuppressWarnings("deprecation")
 	public static boolean isBlockEqualStack(Block block, ItemStack stack) {
 		return block != null && !block.isEmpty() && stack != null && stack.getAmount() > 0

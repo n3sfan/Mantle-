@@ -14,7 +14,7 @@ import io.lethinh.github.mantle.utils.Utils;
 public class SmelteryMultiBlockTracker extends MultiBlockTracker {
 
 	public SmelteryMultiBlockTracker(@SuppressWarnings("rawtypes") MultiBlockController machine) {
-		super(machine, 5);
+		super(machine, 3);
 	}
 
 	@Override

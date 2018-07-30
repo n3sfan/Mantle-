@@ -1,8 +1,6 @@
 package io.lethinh.github.mantle.multiblock.smeltery;
 
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.material.Observer;
 
 import io.lethinh.github.mantle.multiblock.MultiBlockController;
 
@@ -18,12 +16,7 @@ public class BlockSmelteryController extends MultiBlockController<SmelteryMultiB
 
 	@Override
 	public void mimicWork() {
-
-	}
-
-	@Override
-	public BlockFace getDirection() {
-		return ((Observer) block.getState().getData()).getFacing();
+		// TODO Do cooking stuffs
 	}
 
 }

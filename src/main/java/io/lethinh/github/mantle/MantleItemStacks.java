@@ -31,6 +31,8 @@ public class MantleItemStacks {
 	public static final ItemStack MOB_MAGNET;
 	public static final ItemStack SMELTERY_BLOCK;
 	public static final ItemStack SMELTERY_CONTROLLER;
+	public static final ItemStack TELEPORT_RECEIVER;
+	public static final ItemStack TELEPORT_TRANSMITTER;
 
 	static {
 		// Watering Can
@@ -115,12 +117,30 @@ public class MantleItemStacks {
 		STACKS.add(SMELTERY_BLOCK);
 
 		// Smeltery Controller
-		SMELTERY_CONTROLLER = new ItemStackFactory(new ItemStack(Material.OBSERVER)).addEnchant(Enchantment.LUCK, 10)
+		SMELTERY_CONTROLLER = new ItemStackFactory(new ItemStack(Material.OBSERVER))
+				.addEnchant(Enchantment.LOOT_BONUS_BLOCKS, 10)
 				.setLocalizedName(Mantle.PLUGIN_ID + "_smeltery_controller")
 				.setDisplayName(ChatColor.DARK_RED + "Smeltery Controller")
 				.build();
 
 		STACKS.add(SMELTERY_CONTROLLER);
+
+		// Teleport Receiver
+		TELEPORT_RECEIVER = new ItemStackFactory(new ItemStack(Material.BONE_BLOCK))
+				.addEnchant(Enchantment.ARROW_KNOCKBACK, 10).setLocalizedName(Mantle.PLUGIN_ID + "_teleport_receiver")
+				.setDisplayName(ChatColor.LIGHT_PURPLE + "Teleport Receiver")
+				.build();
+
+		STACKS.add(TELEPORT_RECEIVER);
+
+		// Teleport Transmitter
+		TELEPORT_TRANSMITTER = new ItemStackFactory(new ItemStack(Material.BONE_BLOCK))
+				.addEnchant(Enchantment.ARROW_KNOCKBACK, 10)
+				.setLocalizedName(Mantle.PLUGIN_ID + "_teleport_transmitter")
+				.setDisplayName(ChatColor.DARK_RED + "Teleport Transmitter")
+				.build();
+
+		STACKS.add(TELEPORT_TRANSMITTER);
 	}
 
 }
