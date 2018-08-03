@@ -1,7 +1,8 @@
 name: Mantle
-main: io.lethinh.github.mantle.Mantle
-version: 1.0.1
+main: io.github.lethinh.mantle.Mantle
+author: Nesfan
+version: 1.0.3
 commands:
  mantle:
-   description: Give custom items of Mantle plugin
-   usage: /mantlegive <player> <item>
+   description: Mantle command
+   usage: /mantle <option>
