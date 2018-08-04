@@ -1,15 +1,17 @@
 package io.github.lethinh.mantle.event;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import io.github.lethinh.mantle.Mantle;
 import io.github.lethinh.mantle.MantleItemStacks;
 import io.github.lethinh.mantle.block.BlockMachine;
-import io.github.lethinh.mantle.block.impl.*;
-import io.github.lethinh.mantle.multiblock.smeltery.BlockSmelteryController;
-import io.github.lethinh.mantle.multiblock.smeltery.BlockSmelteryPart;
+import io.github.lethinh.mantle.block.GenericMachine;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,142 +21,176 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Le Thinh
  */
 public class MachineChangedEvent implements Listener {
 
-	@EventHandler
-	public void onBlockPlaced(BlockPlaceEvent event) {
-		Player player = event.getPlayer();
-		String name = player.getName();
-		ItemStack heldItem = event.getItemInHand();
-		// ItemStack copy = heldItem.clone();
-		Block block = event.getBlockPlaced();
-		BlockMachine machine = null;
+    @EventHandler
+    public void onBlockPlaced(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        String name = player.getName();
+        ItemStack heldItem = event.getItemInHand();
+        Block block = event.getBlockPlaced();
 
-		if (heldItem.isSimilar(MantleItemStacks.TREE_CUTTER)) {
-			BlockMachine.MACHINES.add(machine = new BlockTreeCutter(block, name));
-		} /*
-			 * else if (heldItem.isSimilar(MantleItemStacks.PLANTER)) {
-			 * BlockMachine.MACHINES.add(machine = new BlockPlanter(block)); }
-			 */
-		else if (heldItem.isSimilar(MantleItemStacks.BLOCK_BREAKER)) {
-			BlockMachine.MACHINES.add(machine = new BlockBlockBreaker(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.BLOCK_PLACER)) {
-			BlockMachine.MACHINES.add(machine = new BlockBlockPlacer(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.MOB_MAGNET)) {
-			BlockMachine.MACHINES.add(machine = new BlockMobMagnet(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.SMELTERY_BLOCK)) {
-			BlockMachine.MACHINES.add(machine = new BlockSmelteryPart(block));
-		} else if (heldItem.isSimilar(MantleItemStacks.SMELTERY_CONTROLLER)) {
-			BlockMachine.MACHINES.add(machine = new BlockSmelteryController(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.TELEPORT_RECEIVER)) {
-			BlockMachine.MACHINES.add(machine = new BlockTeleportReceiver(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.TELEPORT_TRANSMITTER)) {
-			BlockMachine.MACHINES.add(machine = new BlockTeleportTransmitter(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.RECIPE_ATTACHER)) {
-			BlockMachine.MACHINES.add(machine = new BlockRecipeAttacher(block, name));
-		} else if (heldItem.isSimilar(MantleItemStacks.AUTO_CRAFTER)) {
-			BlockMachine.MACHINES.add(machine = new BlockAutoCrafter(block, name));
-		}
+        for (GenericMachine machineType : GenericMachine.values()) {
+            ItemStack blockStack = machineType.getStackForBlock();
 
-		if (machine != null) {
-			machine.onMachinePlaced(player, heldItem);
-		}
-	}
+            if (blockStack == null) {
+                continue;
+            }
 
-	@EventHandler
-	public void onBlockBroken(BlockBreakEvent event) {
-		Block block = event.getBlock();
-		Player player = event.getPlayer();
+            if (heldItem.isSimilar(blockStack) || block.getType() == blockStack.getType() && block.getData() == blockStack.getData().getData()) {
+                BlockMachine machine = machineType.createBlockMachine(block, name);
+                BlockMachine.MACHINES.add(machine);
+                machine.onMachinePlaced(player, heldItem);
+            }
+        }
+    }
 
-		for (BlockMachine machine : BlockMachine.MACHINES) {
-			if (!machine.block.getLocation().equals(block.getLocation())) {
-				continue;
-			}
+    @EventHandler
+    public void onBlockBroken(BlockBreakEvent event) {
+        Block block = event.getBlock();
+        Player player = event.getPlayer();
 
-			if (!machine.canBreak(player)) {
-				event.setCancelled(true);
-				player.sendMessage(ChatColor.RED + "You cannot break this machine because you it is locked!");
-				continue;
-			}
+        for (BlockMachine machine : BlockMachine.MACHINES) {
+            if (!machine.block.getLocation().equals(block.getLocation())) {
+                continue;
+            }
 
-			machine.setTickStopped(true);
+            if (!machine.canBreak(player)) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.RED + "You cannot break this machine because you it is locked!");
+                continue;
+            }
 
-			if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
-				event.setDropItems(false);
+            machine.setTickStopped(true);
 
-				for (ItemStack stack : MantleItemStacks.STACKS) {
-					if (stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "")
-							.equalsIgnoreCase(machine.machineType.getName())) {
-						machine.dropItems(stack);
-					}
-				}
-			}
+            if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                event.setDropItems(false);
 
-			machine.onMachineBroken(player);
-			BlockMachine.MACHINES.remove(machine);
-		}
-	}
+                for (ItemStack stack : MantleItemStacks.STACKS) {
+                    if (stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "")
+                            .equalsIgnoreCase(machine.machineType.getName())) {
+                        machine.dropItems(stack);
+                    }
+                }
+            }
 
-	private final AtomicReference<Location> interactPos = new AtomicReference<>(); // Concurrent
+            machine.onMachineBroken(player);
+            BlockMachine.MACHINES.remove(machine);
+        }
+    }
 
-	@EventHandler
-	public void onBlockOpened(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
+    private final BiMap<Location, CopyOnWriteArrayList<String>> interactPos = Maps.synchronizedBiMap(HashBiMap.create());
 
-		if (player.isSneaking() || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			return;
-		}
+    @EventHandler
+    public void onBlockOpened(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        String name = player.getName();
 
-		Block block = event.getClickedBlock();
+        if (player.isSneaking() || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            return;
+        }
 
-		BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
-				.forEach(machine -> {
-					if (machine.canOpen(player)) {
-						if (machine.inventory.getSize() > 0) {
-							event.setCancelled(true);
-							player.openInventory(machine.inventory);
-							interactPos.set(machine.block.getLocation());
-						}
-					} else {
-						player.sendMessage(ChatColor.RED + "You cannot open this machine because it is locked!");
-					}
-				});
-	}
+        Block block = event.getClickedBlock();
+        Location location = block.getLocation();
 
-	@EventHandler
-	public void onInventoryClicked(InventoryClickEvent event) {
-		Inventory inventory = event.getInventory();
-		ClickType clickType = event.getClick();
-		InventoryAction action = event.getAction();
-		SlotType slotType = event.getSlotType();
-		ItemStack clicked = event.getCurrentItem();
-		ItemStack cursor = event.getCursor();
-		int slot = event.getSlot();
-		InventoryView view = event.getView();
+        BlockMachine.MACHINES.stream().filter(machine -> block.getLocation().equals(machine.block.getLocation()))
+                .forEach(machine -> {
+                    if (machine.canOpen(player)) {
+                        if (machine.inventory.getSize() > 0) {
+                            event.setCancelled(true);
+                            player.openInventory(machine.inventory);
 
-		for (BlockMachine machine : BlockMachine.MACHINES) {
-			if (!machine.inventory.getName().equals(inventory.getName())
-					|| !machine.block.getLocation().equals(interactPos.get())) {
-				continue;
-			}
+                            CopyOnWriteArrayList<String> players = interactPos.get(location);
 
-			boolean cancel = machine.onInventoryInteract(clickType, action, slotType, clicked, cursor, slot, view);
+                            synchronized (interactPos) {
+                                if (players == null || players.isEmpty()) {
+                                    players = new CopyOnWriteArrayList<>(new String[]{name});
+                                } else {
+                                    players.addAll(new CopyOnWriteArrayList<>(new String[]{name}));
+                                }
 
-			if (cancel) {
-				event.setCancelled(true);
-			}
-		}
-	}
+                                interactPos.put(location, players);
+                            }
+                        }
+                    } else {
+                        player.sendMessage(ChatColor.RED + "You cannot open this machine because it is locked!");
+                    }
+                });
+    }
+
+    @EventHandler
+    public void onInventoryClicked(InventoryClickEvent event) {
+        Inventory inventory = event.getInventory();
+        ClickType clickType = event.getClick();
+        InventoryAction action = event.getAction();
+        SlotType slotType = event.getSlotType();
+        ItemStack clicked = event.getCurrentItem();
+        ItemStack cursor = event.getCursor();
+        int slot = event.getSlot();
+        InventoryView view = event.getView();
+        HumanEntity player = event.getWhoClicked();
+
+        for (BlockMachine machine : BlockMachine.MACHINES) {
+            if (!machine.inventory.getName().equals(inventory.getName())) {
+                continue;
+            }
+
+            CopyOnWriteArrayList<String> players = interactPos.get(machine.block.getLocation());
+
+            if (players == null || players.isEmpty()) {
+                continue;
+            }
+
+            if (players.contains(player.getName())) {
+                boolean cancel = machine.onInventoryInteract(clickType, action, slotType, clicked, cursor, slot, view, player);
+
+                if (cancel) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClosed(InventoryCloseEvent event) {
+        String player = event.getPlayer().getName();
+        BiMap<CopyOnWriteArrayList<String>, Location> inverse = interactPos.inverse();
+
+        for (Map.Entry<CopyOnWriteArrayList<String>, Location> entry : inverse.entrySet()) {
+            CopyOnWriteArrayList<String> players = entry.getKey();
+            Location location = entry.getValue();
+
+            if (players.contains(player)) {
+                CopyOnWriteArrayList<String> list = interactPos.get(location);
+
+                if (list == null) {
+                    continue;
+                }
+
+                synchronized (interactPos) {
+                    list.remove(player);
+
+                    if (list.isEmpty()) {
+                        interactPos.remove(location);
+                    } else {
+                        interactPos.put(location, list);
+                    }
+                }
+            }
+        }
+    }
 
 }

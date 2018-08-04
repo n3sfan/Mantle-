@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -90,7 +91,7 @@ public class BlockMobMagnet extends BlockMachine {
     /* Callback */
     @Override
     public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
         if (clicked == null || clicked.getAmount() == 0 || Material.STAINED_GLASS_PANE != clicked.getType()) {
             return false;
         }

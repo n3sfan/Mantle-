@@ -8,6 +8,7 @@ import io.github.lethinh.mantle.utils.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.*;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.IntStream;
 
 /**
  * Created by Le Thinh
@@ -124,16 +126,9 @@ public class BlockAutoCrafter extends BlockMachine {
             world.dropItemNaturally(location, result);
         }
 
-        for (int i = INGREDIENTS_START_SLOT; i < INGREDIENTS_END_SLOT; ++i) {
-            ItemStack ingredient = inventory.getItem(i);
-
-            if (ingredient != null) {
-                world.dropItemNaturally(location, ingredient);
-            }
-        }
+        IntStream.range(INGREDIENTS_START_SLOT, INGREDIENTS_END_SLOT).mapToObj(i -> inventory.getItem(i)).filter(Objects::nonNull).forEach(ingredient -> world.dropItemNaturally(location, ingredient));
     }
 
-    @SuppressWarnings("SuspiciousListRemoveInLoop")
     private boolean extractIngredients(Collection<ItemStack> collection) {
         if (collection.isEmpty() || inventory.getItem(RESULT_SLOT) != null && inventory.getItem(RESULT_SLOT).getAmount() == 64) {
             return false;
@@ -207,8 +202,7 @@ public class BlockAutoCrafter extends BlockMachine {
 
     /* Callbacks */
     @Override
-    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType, ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
         if (clicked == null || clicked.getAmount() == 0 || Material.STAINED_GLASS_PANE != clicked.getType()) {
             return false;
         }

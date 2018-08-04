@@ -10,6 +10,7 @@ import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -95,7 +96,7 @@ public class BlockBlockBreaker extends BlockMachine {
     /* Callbacks */
     @Override
     public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
         if (slot < 27) {
             return false;
         }

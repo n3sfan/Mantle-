@@ -1,14 +1,14 @@
 package io.github.lethinh.mantle.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Created by Le Thinh

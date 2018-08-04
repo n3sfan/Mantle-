@@ -6,6 +6,7 @@ import io.github.lethinh.mantle.block.GenericMachine;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -68,7 +69,7 @@ public class BlockTeleportReceiver extends BlockMachine {
 
 	@Override
 	public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-			ItemStack clicked, ItemStack cursor, int slot, InventoryView view) {
+                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
 		return slot >= 1 && slot < 9;
 	}
 
