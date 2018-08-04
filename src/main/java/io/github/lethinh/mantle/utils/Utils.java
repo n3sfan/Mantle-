@@ -1,7 +1,9 @@
 package io.github.lethinh.mantle.utils;
 
-import io.github.lethinh.mantle.Mantle;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -9,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.stream.IntStream;
@@ -23,8 +26,14 @@ public final class Utils {
     }
 
     /* Internal */
-    public static NamespacedKey prefixNamespaced(String key) {
-        return new NamespacedKey(Mantle.instance, key);
+    public static String getFileNameNoExtension(File file) {
+        String name = file.getName();
+
+        if (name.lastIndexOf('.') > 0) {
+            name = name.substring(0, name.lastIndexOf('.'));
+        }
+
+        return name;
     }
 
     public static String encryptBase64(String text) {
@@ -32,7 +41,13 @@ public final class Utils {
     }
 
     public static String decryptBase64(String text) {
-        return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
+        byte[] bytes = Base64.getDecoder().decode(text);
+
+        if (bytes == null) {
+            return null;
+        }
+
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     /* Inventory */

@@ -3,7 +3,7 @@ package io.github.lethinh.mantle.block.impl;
 import io.github.lethinh.mantle.Mantle;
 import io.github.lethinh.mantle.block.BlockMachine;
 import io.github.lethinh.mantle.block.GenericMachine;
-import io.github.lethinh.mantle.gson.direct.CustomDataManager;
+import io.github.lethinh.mantle.io.direct.CustomDataManager;
 import io.github.lethinh.mantle.utils.ItemStackFactory;
 import io.github.lethinh.mantle.utils.Utils;
 import org.bukkit.Effect;
@@ -75,7 +75,7 @@ public class BlockBlockBreaker extends BlockMachine {
 
     @Override
     public boolean canWork() {
-        return super.canWork() && !Utils.isFull(inventory);
+        return super.canWork() && !Utils.isFull(inventory, 27);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package io.github.lethinh.mantle.block;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.gson.direct.CustomDataManager;
-import io.github.lethinh.mantle.gson.direct.CustomDataSerializable;
+import io.github.lethinh.mantle.io.direct.CustomDataManager;
+import io.github.lethinh.mantle.io.direct.CustomDataSerializable;
 import io.github.lethinh.mantle.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

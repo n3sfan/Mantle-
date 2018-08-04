@@ -13,10 +13,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -98,13 +95,13 @@ public class BlockAutoCrafter extends BlockMachine {
                 ShapedRecipe shaped = (ShapedRecipe) recipe;
 
                 if (extractIngredients(shaped.getIngredientMap().values())) {
-                    output(toCraft, shaped.getResult());
+                    output(toCraft, shaped.getResult().clone());
                 }
             } else if (recipe instanceof ShapelessRecipe) {
                 ShapelessRecipe shapeless = (ShapelessRecipe) recipe;
 
                 if (extractIngredients(shapeless.getIngredientList())) {
-                    output(toCraft, shapeless.getResult());
+                    output(toCraft, shapeless.getResult().clone());
                 }
             }
         }
@@ -136,22 +133,24 @@ public class BlockAutoCrafter extends BlockMachine {
         }
     }
 
-    private boolean extractIngredients(Collection<ItemStack> ingredients) {
-        if (ingredients.isEmpty() || inventory.getItem(RESULT_SLOT) != null && inventory.getItem(RESULT_SLOT).getAmount() == 64) {
+    @SuppressWarnings("SuspiciousListRemoveInLoop")
+    private boolean extractIngredients(Collection<ItemStack> collection) {
+        if (collection.isEmpty() || inventory.getItem(RESULT_SLOT) != null && inventory.getItem(RESULT_SLOT).getAmount() == 64) {
             return false;
         }
 
-        Map<Integer, ItemStack> toTake = new HashMap<>(9);
+        Set<ItemStack> ingredients = new HashSet<>(collection);
+        Map<Integer, ItemStack> toTake = new HashMap<>();
 
         for (ItemStack ingredient : ingredients) {
             int typeMask = 0;
 
-            for (int i = INGREDIENTS_START_SLOT; i < INGREDIENTS_END_SLOT; ++i) {
+            for (int j = INGREDIENTS_START_SLOT; j < INGREDIENTS_END_SLOT; ++j) {
                 if (toTake.size() == ingredients.size()) {
                     break;
                 }
 
-                ItemStack stack = inventory.getItem(i);
+                ItemStack stack = inventory.getItem(j);
 
                 if (stack == null) {
                     continue;
@@ -168,14 +167,13 @@ public class BlockAutoCrafter extends BlockMachine {
                     continue;
                 }
 
-                toTake.put(i, new ItemStackFactory(stack).setAmount(stack.getAmount() - ingredient.getAmount()).build());
+                ItemStack clone = stack.clone();
+                toTake.put(j, new ItemStackFactory(clone).setAmount(clone.getAmount() - getNeededAmount(collection, ingredient)).build());
                 typeMask |= 1 << id;
             }
         }
 
-        System.out.println(toTake.size());
-
-        if (toTake.size() == ingredients.size()) {
+        if (toTake.size() >= ingredients.size()) {
             for (Entry<Integer, ItemStack> entry : toTake.entrySet()) {
                 int slot = entry.getKey();
                 ItemStack stack = entry.getValue();
@@ -193,14 +191,18 @@ public class BlockAutoCrafter extends BlockMachine {
         return false;
     }
 
-    private void output(ItemStack expect, ItemStack output) {
-        if (expect == null) {
-            inventory.setItem(RESULT_SLOT, output.clone());
-        } else if (expect.getType() == output.getType() && expect.getAmount() < 64) {
-            ItemStack increase = new ItemStackFactory(expect).setAmount(expect.getAmount() + output.getAmount())
+    private void output(ItemStack current, ItemStack output) {
+        if (current == null) {
+            inventory.setItem(RESULT_SLOT, output);
+        } else if (current.getType() == output.getType() && current.getAmount() < 64) {
+            ItemStack increase = new ItemStackFactory(current).setAmount(current.getAmount() + output.getAmount())
                     .build();
             inventory.setItem(RESULT_SLOT, increase);
         }
+    }
+
+    private int getNeededAmount(Collection<ItemStack> ingredients, ItemStack stack) {
+        return ingredients.stream().filter(ingredient -> ingredient.isSimilar(stack)).mapToInt(ItemStack::getAmount).sum();
     }
 
     /* Callbacks */

@@ -1,6 +1,6 @@
 package io.github.lethinh.mantle;
 
-import io.github.lethinh.mantle.gson.IOMachines;
+import io.github.lethinh.mantle.io.IOMachines;
 import io.github.lethinh.mantle.loader.CommandLoader;
 import io.github.lethinh.mantle.loader.EventLoader;
 import io.github.lethinh.mantle.loader.ILoader;
@@ -51,13 +51,27 @@ public final class Mantle extends JavaPlugin {
             }
         });
 
-        // Machine
+        // Create Mantle data folder
+        if (!getDataFolder().exists()) {
+            if (!getDataFolder().mkdirs()) {
+                logger.severe("Couldn't create directory Mantle!");
+            }
+        }
+
+        // Load machines and their data
         logger.info("Loading machines...");
         IOMachines.loadMachines();
         logger.info("Loaded machines!");
-        logger.info("Loading machines data...");
-        IOMachines.loadMachinesData();
-        logger.info("Loaded machines data!");
+
+        try {
+
+            logger.info("Loading machines data...");
+            IOMachines.loadMachinesData();
+            logger.info("Loaded machines data!");
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.severe("An error occurred while loading machines data!");
+        }
 
 
         // Item Magnet
@@ -96,6 +110,7 @@ public final class Mantle extends JavaPlugin {
     public void onDisable() {
         Logger logger = getLogger();
 
+        // Save machines and their data
         try {
             logger.info("Saving machines data...");
             IOMachines.saveMachines();
@@ -104,8 +119,7 @@ public final class Mantle extends JavaPlugin {
             IOMachines.saveMachinesData();
             logger.info("Saved machines inventories data!");
         } catch (IOException e) {
-            logger.severe(
-                    "An error occured while saving machines or their inventories data, contact the developer of Mantle!");
+            logger.severe("An error occured while saving machines or their data!");
             e.printStackTrace();
         }
     }

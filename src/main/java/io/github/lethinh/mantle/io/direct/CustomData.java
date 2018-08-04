@@ -2,7 +2,7 @@
  * Copyright (c) 2018 to Le Thinh
  */
 
-package io.github.lethinh.mantle.gson.direct;
+package io.github.lethinh.mantle.io.direct;
 
 import com.google.gson.internal.LazilyParsedNumber;
 

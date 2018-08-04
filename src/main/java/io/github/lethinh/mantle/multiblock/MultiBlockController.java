@@ -3,7 +3,7 @@ package io.github.lethinh.mantle.multiblock;
 import io.github.lethinh.mantle.Mantle;
 import io.github.lethinh.mantle.block.BlockMachine;
 import io.github.lethinh.mantle.block.GenericMachine;
-import io.github.lethinh.mantle.gson.direct.CustomDataManager;
+import io.github.lethinh.mantle.io.direct.CustomDataManager;
 import io.github.lethinh.mantle.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
