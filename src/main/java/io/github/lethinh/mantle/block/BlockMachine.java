@@ -54,7 +54,7 @@ public class BlockMachine implements CustomDataSerializable {
         this.runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                if (tickStopped) {
+                if (!canWork()) {
                     return;
                 }
 
