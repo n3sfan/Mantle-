@@ -1,0 +1,22 @@
+#                o   o   O  o   o o-O-o o    o--o
+#                |\ /|  / \ |\  |   |   |    |
+#                | O | o---o| \ |   |   |    O-o
+#                |   | |   ||  \|   |   |    |
+#                o   o o   oo   o   o   O---oo--o
+
+
+performance:
+  # should we apply physics for changed blocks?
+  apply_physics: true
+
+auto_save:
+  enable: true
+  # duration between saving times, unit is Minecraft ticks (20 ticks = 1 second)
+  interval: 100
+
+
+
+
+###########################################
+# pls don't change this
+config_version: 1

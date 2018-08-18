@@ -1,17 +1,14 @@
 package io.github.lethinh.mantle.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import io.github.lethinh.mantle.command.impl.AllowCommand;
-import io.github.lethinh.mantle.command.impl.DeallowCommand;
-import io.github.lethinh.mantle.command.impl.GiveCommand;
-import io.github.lethinh.mantle.command.impl.ListCommand;
+import io.github.lethinh.mantle.command.impl.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Thanks to Banbeucmas for creating this.
@@ -25,6 +22,7 @@ public class MantleAdminCommands implements CommandExecutor {
 		commands.add(new ListCommand());
 		commands.add(new AllowCommand());
 		commands.add(new DeallowCommand());
+        commands.add(new ReloadCommand());
 	}
 
 	@Override

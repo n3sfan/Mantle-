@@ -80,6 +80,12 @@ public enum GenericMachine implements MachineDefinition {
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockEnergyPipe(block, players);
         }
+    },
+    FIRST_AID_KIT {
+        @Override
+        public BlockMachine createBlockMachine(Block block, String... players) {
+            return new BlockFirstAidKit(block, players);
+        }
     };
 
     @Override

@@ -70,7 +70,7 @@ public class BlockBlockPlacer extends BlockMachineEnergized {
                 continue;
             }
 
-            surround.setType(content.getType());
+            surround.setType(Material.AIR, Mantle.instance.getConfig().getBoolean("performance.apply_physics"));
             surround.setData(content.getData().getData());
             content.setAmount(content.getAmount() - 1);
             inventory.setItem(i, content);

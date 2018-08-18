@@ -76,7 +76,7 @@ public class BlockTreeCutter extends BlockMachineEnergized {
             }
 
             surround.getDrops().forEach(inventory::addItem);
-            surround.setType(Material.AIR);
+            surround.setType(Material.AIR, Mantle.instance.getConfig().getBoolean("performance.apply_physics"));
         });
     }
 
