@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -136,7 +137,7 @@ public class MachineChangedEvent implements Listener {
         SlotType slotType = event.getSlotType();
         ItemStack clicked = event.getCurrentItem();
         ItemStack cursor = event.getCursor();
-        int slot = event.getSlot();
+        int slot = event.getRawSlot();
         InventoryView view = event.getView();
         HumanEntity player = event.getWhoClicked();
 
@@ -156,6 +157,7 @@ public class MachineChangedEvent implements Listener {
 
                 if (cancel) {
                     event.setCancelled(true);
+                    event.setResult(Event.Result.DENY);
                 }
             }
         }
