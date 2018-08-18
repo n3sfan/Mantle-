@@ -1,5 +1,6 @@
 package io.github.lethinh.mantle;
 
+import io.github.lethinh.mantle.io.AutoSaveHelper;
 import io.github.lethinh.mantle.io.IOMachines;
 import io.github.lethinh.mantle.loader.CommandLoader;
 import io.github.lethinh.mantle.loader.EventLoader;
@@ -23,7 +24,6 @@ import java.util.logging.Logger;
 public final class Mantle extends JavaPlugin {
 
     public static final String PLUGIN_ID = "mantle"; // Just for enforcements, no conflicts with other plugins
-    public static final String VERSION = "1.0.1";
     public static Mantle instance;
 
     private EventLoader eventLoader;
@@ -53,10 +53,14 @@ public final class Mantle extends JavaPlugin {
 
         // Create Mantle data folder
         if (!getDataFolder().exists()) {
-            if (!getDataFolder().mkdirs()) {
+            if(!getDataFolder().mkdirs()) {
                 logger.severe("Couldn't create directory Mantle!");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
             }
         }
+
+        saveDefaultConfig();
 
         // Load machines and their data
         logger.info("Loading machines...");
@@ -71,6 +75,8 @@ public final class Mantle extends JavaPlugin {
         } catch (IOException e) {
             e.printStackTrace();
             logger.severe("An error occurred while loading machines data!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
 
 
@@ -102,6 +108,8 @@ public final class Mantle extends JavaPlugin {
                 }
             }
         }.runTaskTimerAsynchronously(this, 20L, 10L);
+
+        new AutoSaveHelper(this, getConfig().getBoolean("auto_save.enable"), getConfig().getLong("auto_save.interval"));
 
         logger.info("Mantle is loaded!");
     }
