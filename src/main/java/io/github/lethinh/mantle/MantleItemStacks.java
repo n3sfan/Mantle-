@@ -35,6 +35,7 @@ public class MantleItemStacks {
     public static final ItemStack RECIPE_ATTACHER;
     public static final ItemStack AUTO_CRAFTER;
     public static final ItemStack ENDER_HOPPER;
+    public static final ItemStack FIRST_AID_KIT;
 
     static {
         // Watering Can
@@ -166,6 +167,15 @@ public class MantleItemStacks {
                 .setDisplayName(ChatColor.DARK_PURPLE + "Ender Hopper").build();
 				
 		STACKS.add(ENDER_HOPPER);
+
+		// First Aid Kit
+        FIRST_AID_KIT = new ItemStackFactory(new ItemStack(Material.ENDER_CHEST))
+                .addEnchant(Enchantment.DURABILITY, 1)
+                .addFlags(ItemFlag.HIDE_ENCHANTS)
+                .setLocalizedName(Mantle.PLUGIN_ID + "_first_aid_kit")
+                .setDisplayName(ChatColor.RED + "First Aid Kit").build();
+
+        STACKS.add(FIRST_AID_KIT);
     }
 
 }
