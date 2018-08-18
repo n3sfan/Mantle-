@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import io.github.lethinh.mantle.io.direct.CustomDataManager;
 import io.github.lethinh.mantle.utils.ItemStackFactory;
 import org.bukkit.Material;
@@ -18,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Created by Le Thinh
  */
-public class BlockBlockPlacer extends BlockMachine {
+public class BlockBlockPlacer extends BlockMachineEnergized {
 
     // Placing helper thingy
     private BlockFace face = BlockFace.SELF;
@@ -43,6 +44,8 @@ public class BlockBlockPlacer extends BlockMachine {
                 .setLocalizedName("Up").build());
         inventory.setItem(41, new ItemStackFactory(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7))
                 .setLocalizedName("Down").build());
+
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 200, 0));
     }
 
     @Override
@@ -76,13 +79,14 @@ public class BlockBlockPlacer extends BlockMachine {
 
     @Override
     public CustomDataManager writeCustomData() {
-        CustomDataManager manager = new CustomDataManager();
+        CustomDataManager manager = super.writeCustomData();
         manager.put("Face", face.name());
         return manager;
     }
 
     @Override
     public void readCustomData(CustomDataManager manager) {
+        super.readCustomData(manager);
         face = BlockFace.valueOf(manager.getAsString("Face"));
     }
 

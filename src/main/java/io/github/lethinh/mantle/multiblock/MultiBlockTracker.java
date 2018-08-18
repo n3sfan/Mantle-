@@ -36,6 +36,8 @@ public abstract class MultiBlockTracker {
             BlockFace face = horizontals[i];
             Location wallLoc = offset2Outer(center, face, size);
 
+            System.out.println("Wall: " + wallLoc.toString());
+
             // No outer wall, shit
             if (wallLoc.getBlock().isEmpty() || wallLoc.getBlock().isLiquid()) {
                 return null;

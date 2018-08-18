@@ -109,20 +109,22 @@ public final class IOMachines {
             FileConfiguration machineData = new YamlConfiguration();
             Inventory inventory = machine.inventory;
 
-            // Inventory
-            machineData.set("invSize", inventory.getSize());
-            machineData.set("invTitle", inventory.getTitle());
+            if (inventory != null) {
+                // Inventory
+                machineData.set("invSize", inventory.getSize());
+                machineData.set("invTitle", inventory.getTitle());
 
-            ConfigurationSection stacksSection = machineData.createSection("stacks");
+                ConfigurationSection stacksSection = machineData.createSection("stacks");
 
-            for (int i = 0; i < inventory.getSize(); ++i) {
-                ItemStack stack = inventory.getItem(i);
+                for (int i = 0; i < inventory.getSize(); ++i) {
+                    ItemStack stack = inventory.getItem(i);
 
-                if (stack == null) {
-                    continue;
+                    if (stack == null) {
+                        continue;
+                    }
+
+                    stacksSection.set("slot-" + i, stack);
                 }
-
-                stacksSection.set("slot-" + i, stack);
             }
 
             // Additional data

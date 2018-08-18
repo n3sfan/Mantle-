@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import io.github.lethinh.mantle.io.direct.CustomDataManager;
 import io.github.lethinh.mantle.utils.ItemStackFactory;
 import io.github.lethinh.mantle.utils.Utils;
@@ -20,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Created by Le Thinh
  */
-public class BlockBlockBreaker extends BlockMachine {
+public class BlockBlockBreaker extends BlockMachineEnergized {
 
     // Breaking helper thingy
     private BlockFace face = BlockFace.SELF;
@@ -49,6 +50,8 @@ public class BlockBlockBreaker extends BlockMachine {
         inventory.setItem(42, new ItemStackFactory(new ItemStack(Material.FEATHER))
                 .setLocalizedName("Fancy Render: " + fancyRender).setLore("Display effects when block is broken")
                 .build());
+
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 200, 0));
     }
 
     @Override
@@ -81,7 +84,7 @@ public class BlockBlockBreaker extends BlockMachine {
 
     @Override
     public CustomDataManager writeCustomData() {
-        CustomDataManager manager = new CustomDataManager();
+        CustomDataManager manager = super.writeCustomData();
         manager.put("Face", face.name());
         manager.put("FancyRender", fancyRender);
         return manager;
@@ -89,14 +92,14 @@ public class BlockBlockBreaker extends BlockMachine {
 
     @Override
     public void readCustomData(CustomDataManager manager) {
+        super.readCustomData(manager);
         face = BlockFace.valueOf(manager.getAsString("Face"));
         fancyRender = manager.getAsBoolean("FancyRender");
     }
 
     /* Callbacks */
     @Override
-    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
+    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType, ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
         if (slot < 27) {
             return false;
         }

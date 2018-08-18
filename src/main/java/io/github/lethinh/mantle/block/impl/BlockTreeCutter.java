@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import io.github.lethinh.mantle.io.direct.CustomDataManager;
 import io.github.lethinh.mantle.utils.AreaManager;
 import io.github.lethinh.mantle.utils.ItemStackFactory;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 /**
  * Created by Le Thinh
  */
-public class BlockTreeCutter extends BlockMachine {
+public class BlockTreeCutter extends BlockMachineEnergized {
 
     private int xExpand = 7, yExpand = 30, zExpand = 7;
     private boolean fancyRender = true;
@@ -48,6 +49,8 @@ public class BlockTreeCutter extends BlockMachine {
                 .setLocalizedName("Fancy Render: " + fancyRender)
                 .setLore("Display effects when block is broken, may be laggy")
                 .build());
+
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 2000, 0));
     }
 
     @Override
@@ -82,10 +85,9 @@ public class BlockTreeCutter extends BlockMachine {
         return super.canWork() && !Utils.isFull(inventory, 27);
     }
 
-
     @Override
     public CustomDataManager writeCustomData() {
-        CustomDataManager manager = new CustomDataManager();
+        CustomDataManager manager = super.writeCustomData();
         manager.put("XExpand", xExpand);
         manager.put("YExpand", yExpand);
         manager.put("ZExpand", zExpand);
@@ -95,6 +97,7 @@ public class BlockTreeCutter extends BlockMachine {
 
     @Override
     public void readCustomData(CustomDataManager manager) {
+        super.readCustomData(manager);
         xExpand = manager.getAsNumber("XExpand").intValue();
         yExpand = manager.getAsNumber("YExpand").intValue();
         zExpand = manager.getAsNumber("ZExpand").intValue();
@@ -103,8 +106,7 @@ public class BlockTreeCutter extends BlockMachine {
 
     /* Callbacks */
     @Override
-    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
+    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType, ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
         if (slot < 27) {
             return false;
         }

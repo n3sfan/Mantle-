@@ -63,8 +63,7 @@ public abstract class MultiBlockController<T extends MultiBlockTracker> extends 
     /* Callbacks */
     @Override
     public void onMachinePlaced(Player player, ItemStack heldItem) {
-        direction = Utils.getBlockFaceFromPlayer(block.getLocation(), player);
-        System.out.println("Placed dir: " + direction.name() + ", maybe: " + (block.getState().getData() instanceof Directional ? ((Directional) block.getState().getData()).getFacing().name() : BlockFace.NORTH.name()));
+        direction = block.getState().getData() instanceof Directional ? ((Directional) block.getState().getData()).getFacing() : BlockFace.NORTH;
         super.onMachinePlaced(player, heldItem);
     }
 

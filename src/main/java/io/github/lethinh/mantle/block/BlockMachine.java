@@ -31,26 +31,26 @@ public class BlockMachine implements CustomDataSerializable {
 
     /* Static Members */
     public static final CopyOnWriteArrayList<BlockMachine> MACHINES = new CopyOnWriteArrayList<>();
-    protected static final long DEFAULT_DELAY = 0x14, DEFAULT_PERIOD = 0xa;
+    protected static final long DEFAULT_DELAY = 20L, DEFAULT_PERIOD = 10L;
+    protected static final int DEFAULT_ENERGY_CAPACITY = 100000;
 
     /* Instance Members */
-    public final GenericMachine machineType;
+    public final MachineDefinition machineType;
     public final Block block;
     public Inventory inventory;
     public final BukkitRunnable runnable;
     public List<String> accessiblePlayers;
 
     /* Default constructor */
-    public BlockMachine(GenericMachine machineType, Block block, int invSlots, String invName, String... players) {
+    public BlockMachine(MachineDefinition machineType, Block block, int invSlots, String invName, String... players) {
         this(machineType, block, Bukkit.createInventory(null, invSlots, invName), players);
     }
 
-    public BlockMachine(GenericMachine machineType, Block block, Inventory inventory, String... players) {
+    public BlockMachine(MachineDefinition machineType, Block block, Inventory inventory, String... players) {
         this.machineType = machineType;
         this.block = block;
         this.accessiblePlayers = new ArrayList<>();
         this.accessiblePlayers.addAll(Arrays.asList(players));
-
         this.inventory = inventory;
         this.runnable = new BukkitRunnable() {
             @Override
@@ -94,7 +94,7 @@ public class BlockMachine implements CustomDataSerializable {
     }
 
     public int getRealSlots() {
-        return 27;
+        return inventory.getSize();
     }
 
     /**
@@ -135,7 +135,7 @@ public class BlockMachine implements CustomDataSerializable {
     }
 
     public CustomDataManager writeCustomData() {
-        return new CustomDataManager();
+        return null;
     }
 
     /* Callbacks */

@@ -1,8 +1,5 @@
 package io.github.lethinh.mantle.event;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Maps;
 import io.github.lethinh.mantle.Mantle;
 import io.github.lethinh.mantle.MantleItemStacks;
 import io.github.lethinh.mantle.block.BlockMachine;
@@ -29,6 +26,8 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -92,7 +91,7 @@ public class MachineChangedEvent implements Listener {
         }
     }
 
-    private final BiMap<Location, CopyOnWriteArrayList<String>> interactPos = Maps.synchronizedBiMap(HashBiMap.create());
+    private final ConcurrentMap<Location, CopyOnWriteArrayList<String>> interactPos = new ConcurrentHashMap<>();
 
     @EventHandler
     public void onBlockOpened(PlayerInteractEvent event) {
@@ -115,15 +114,13 @@ public class MachineChangedEvent implements Listener {
 
                             CopyOnWriteArrayList<String> players = interactPos.get(location);
 
-                            synchronized (interactPos) {
-                                if (players == null || players.isEmpty()) {
-                                    players = new CopyOnWriteArrayList<>(new String[]{name});
-                                } else {
-                                    players.addAll(new CopyOnWriteArrayList<>(new String[]{name}));
-                                }
-
-                                interactPos.put(location, players);
+                            if (players == null || players.isEmpty()) {
+                                players = new CopyOnWriteArrayList<>(new String[]{name});
+                            } else {
+                                players.addAll(new CopyOnWriteArrayList<>(new String[]{name}));
                             }
+
+                            interactPos.put(location, players);
                         }
                     } else {
                         player.sendMessage(ChatColor.RED + "You cannot open this machine because it is locked!");
@@ -167,27 +164,22 @@ public class MachineChangedEvent implements Listener {
     @EventHandler
     public void onInventoryClosed(InventoryCloseEvent event) {
         String player = event.getPlayer().getName();
-        BiMap<CopyOnWriteArrayList<String>, Location> inverse = interactPos.inverse();
 
-        for (Map.Entry<CopyOnWriteArrayList<String>, Location> entry : inverse.entrySet()) {
-            CopyOnWriteArrayList<String> players = entry.getKey();
-            Location location = entry.getValue();
+        for (Map.Entry<Location, CopyOnWriteArrayList<String>> entry : interactPos.entrySet()) {
+            Location location = entry.getKey();
+            CopyOnWriteArrayList<String> players = entry.getValue();
+
+            if (players == null) {
+                continue;
+            }
 
             if (players.contains(player)) {
-                CopyOnWriteArrayList<String> list = interactPos.get(location);
+                players.remove(player);
 
-                if (list == null) {
-                    continue;
-                }
-
-                synchronized (interactPos) {
-                    list.remove(player);
-
-                    if (list.isEmpty()) {
-                        interactPos.remove(location);
-                    } else {
-                        interactPos.put(location, list);
-                    }
+                if (players.isEmpty()) {
+                    interactPos.remove(location);
+                } else {
+                    interactPos.put(location, players);
                 }
             }
         }

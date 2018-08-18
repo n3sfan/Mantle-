@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,61 +22,62 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by Le Thinh
  */
-public class BlockTeleportReceiver extends BlockMachine {
+public class BlockTeleportReceiver extends BlockMachineEnergized {
 
-	public static final ConcurrentMap<ItemStack, Location> WARPS = new ConcurrentHashMap<>();
-	private ItemStack lastStack = null;
+    public static final ConcurrentMap<ItemStack, Location> WARPS = new ConcurrentHashMap<>();
+    private ItemStack lastStack = null;
 
-	public BlockTeleportReceiver(Block block, String... players) {
-		super(GenericMachine.TELEPORT_RECEIVER, block, 9, "Teleport Receiver", players);
+    public BlockTeleportReceiver(Block block, String... players) {
+        super(GenericMachine.TELEPORT_RECEIVER, block, 9, "Teleport Receiver", players);
 
-		for (int i = 1; i < inventory.getSize(); ++i) {
-			inventory.setItem(i, new ItemStack(Material.STAINED_GLASS_PANE));
-		}
-	}
+        for (int i = 1; i < inventory.getSize(); ++i) {
+            inventory.setItem(i, new ItemStack(Material.STAINED_GLASS_PANE));
+        }
 
-	@Override
-	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimerAsynchronously(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
-	}
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 500, 0));
+    }
 
-	@Override
-	public void work() {
-		ItemStack stack = inventory.getItem(0);
+    @Override
+    public void handleUpdate(Mantle plugin) {
+        runnable.runTaskTimerAsynchronously(plugin, DEFAULT_DELAY, DEFAULT_PERIOD);
+    }
 
-		if (stack == null || stack.getAmount() == 0) {
-			return;
-		}
+    @Override
+    public void work() {
+        ItemStack stack = inventory.getItem(0);
 
-		if (lastStack != null && !lastStack.isSimilar(stack)) {
-			WARPS.remove(lastStack);
-		}
+        if (stack == null || stack.getAmount() == 0) {
+            return;
+        }
 
-		if (!WARPS.containsKey(stack)) {
-			WARPS.put(stack, block.getLocation());
-			lastStack = stack;
-		}
-	}
+        if (lastStack != null && !lastStack.isSimilar(stack)) {
+            WARPS.remove(lastStack);
+        }
 
-	/* Callbacks */
-	@Override
-	public void onMachineBroken(Player player) {
-		for (Entry<ItemStack, Location> entry : WARPS.entrySet()) {
-			if (entry.getValue().equals(block.getLocation())) {
-				WARPS.remove(entry.getKey());
-			}
-		}
-	}
+        if (!WARPS.containsKey(stack)) {
+            WARPS.put(stack, block.getLocation());
+            lastStack = stack;
+        }
+    }
 
-	@Override
-	public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
-		return slot >= 1 && slot < 9;
-	}
+    /* Callbacks */
+    @Override
+    public void onMachineBroken(Player player) {
+        for (Entry<ItemStack, Location> entry : WARPS.entrySet()) {
+            if (entry.getValue().equals(block.getLocation())) {
+                WARPS.remove(entry.getKey());
+            }
+        }
+    }
 
-	@Override
-	public int getRealSlots() {
-		return 1;
-	}
+    @Override
+    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType, ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
+        return slot >= 1 && slot < 9;
+    }
+
+    @Override
+    public int getRealSlots() {
+        return 1;
+    }
 
 }

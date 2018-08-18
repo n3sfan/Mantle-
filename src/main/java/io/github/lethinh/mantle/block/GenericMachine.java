@@ -12,80 +12,82 @@ import io.github.lethinh.mantle.multiblock.smeltery.BlockSmelteryPart;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public enum GenericMachine {
+public enum GenericMachine implements MachineDefinition {
 
-    UNKNOWN(""),
-    BLOCK_BREAKER("block_breaker") {
+    UNKNOWN, // FIXME Necessary?
+    BLOCK_BREAKER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockBlockBreaker(block, players);
         }
     },
-    BLOCK_PLACER("block_placer") {
+    BLOCK_PLACER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockBlockPlacer(block, players);
         }
     },
-    TREE_CUTTER("tree_cutter") {
+    TREE_CUTTER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockTreeCutter(block, players);
         }
     },
-    TELEPORT_RECEIVER("teleport_receiver") {
+    TELEPORT_RECEIVER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockTeleportReceiver(block, players);
         }
     },
-    TELEPORT_TRANSMITTER("teleport_transmitter") {
+    TELEPORT_TRANSMITTER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockTeleportTransmitter(block, players);
         }
     },
-    RECIPE_ATTACHER("recipe_attacher") {
+    RECIPE_ATTACHER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockRecipeAttacher(block, players);
         }
     },
-    AUTO_CRAFTER("auto_crafter") {
+    AUTO_CRAFTER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockAutoCrafter(block, players);
         }
     },
-    SMELTERY_CONTROLLER("smeltery_controller") {
+    SMELTERY_CONTROLLER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockSmelteryController(block, players);
         }
     },
-    SMELTERY_BLOCK("smeltery_block") {
+    SMELTERY_BLOCK {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockSmelteryPart(block);
         }
     },
-    ENDER_HOPPER("ender_hopper") {
+    ENDER_HOPPER {
         @Override
         public BlockMachine createBlockMachine(Block block, String... players) {
             return new BlockEnderHopper(block, players);
         }
+    },
+    ENERGY_PIPE {
+        @Override
+        public BlockMachine createBlockMachine(Block block, String... players) {
+            return new BlockEnergyPipe(block, players);
+        }
     };
 
-    private final String name;
-
-    GenericMachine(String name) {
-        this.name = name;
-    }
-
+    @Override
     public String getName() {
-        return name;
+        return name().toLowerCase();
     }
 
+    @Override
     public ItemStack getStackForBlock() {
         for (ItemStack stack : MantleItemStacks.STACKS) {
             if (!stack.getType().isBlock()) {
@@ -94,7 +96,7 @@ public enum GenericMachine {
 
             String locName = stack.getItemMeta().getLocalizedName().replace(Mantle.PLUGIN_ID + "_", "");
 
-            if (locName.equalsIgnoreCase(name)) {
+            if (locName.equalsIgnoreCase(getName())) {
                 return stack;
             }
         }
@@ -102,8 +104,9 @@ public enum GenericMachine {
         return null;
     }
 
+    @Override
     public BlockMachine createBlockMachine(Block block, String... players) {
-        throw new UnsupportedOperationException();
+        throw new AbstractMethodError();
     }
 
 }

@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -22,69 +23,70 @@ import java.util.concurrent.ArrayBlockingQueue;
 /**
  * Created by Le Thinh
  */
-public class BlockTeleportTransmitter extends BlockMachine {
+public class BlockTeleportTransmitter extends BlockMachineEnergized {
 
-	public BlockTeleportTransmitter(Block block, String... players) {
-		super(GenericMachine.TELEPORT_TRANSMITTER, block, 9, "Teleport Transmitter", players);
+    public BlockTeleportTransmitter(Block block, String... players) {
+        super(GenericMachine.TELEPORT_TRANSMITTER, block, 9, "Teleport Transmitter", players);
 
-		for (int i = 1; i < inventory.getSize(); ++i) {
-			inventory.setItem(i, new ItemStack(Material.STAINED_GLASS_PANE));
-		}
-	}
+        for (int i = 1; i < inventory.getSize(); ++i) {
+            inventory.setItem(i, new ItemStack(Material.STAINED_GLASS_PANE));
+        }
 
-	@Override
-	public void handleUpdate(Mantle plugin) {
-		runnable.runTaskTimerAsynchronously(plugin, DEFAULT_DELAY + 10L, DEFAULT_PERIOD);
-	}
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 500, 0));
+    }
 
-	@Override
-	public void work() {
-		ItemStack stack = inventory.getItem(0);
+    @Override
+    public void handleUpdate(Mantle plugin) {
+        runnable.runTaskTimerAsynchronously(plugin, DEFAULT_DELAY + 10L, DEFAULT_PERIOD);
+    }
 
-		if (stack == null || stack.getAmount() == 0 || BlockTeleportReceiver.WARPS.isEmpty()) {
-			return;
-		}
+    @Override
+    public void work() {
+        ItemStack stack = inventory.getItem(0);
 
-		Queue<Player> queue = new ArrayBlockingQueue<>(4); // Max is 4 players per teleport and who stand on the
-															// transmitter first will be teleported first
-		Location dst = null;
+        if (stack == null || stack.getAmount() == 0 || BlockTeleportReceiver.WARPS.isEmpty()) {
+            return;
+        }
 
-		for (Entry<ItemStack, Location> entry : BlockTeleportReceiver.WARPS.entrySet()) {
-			ItemStack toStack = entry.getKey();
+        Queue<Player> queue = new ArrayBlockingQueue<>(4); // Max is 4 players per teleport and who stand on the
+        // transmitter first will be teleported first
+        Location dst = null;
 
-			if (toStack == null) {
-				continue;
-			}
+        for (Entry<ItemStack, Location> entry : BlockTeleportReceiver.WARPS.entrySet()) {
+            ItemStack toStack = entry.getKey();
 
-			Location toLocation = entry.getValue();
+            if (toStack == null) {
+                continue;
+            }
 
-			if (!toStack.equals(stack)) {
-				continue;
-			}
+            Location toLocation = entry.getValue();
 
-			dst = toLocation;
-			block.getWorld().getNearbyEntities(block.getLocation(), 1D, 1D, 1D).stream()
-					.filter(e -> !e.isDead() && e instanceof Player)
-					.forEach(e -> queue.offer((Player) e));
-		}
+            if (!toStack.equals(stack)) {
+                continue;
+            }
 
-		while (dst != null && !queue.isEmpty()) {
-			Player player = queue.poll();
-			player.teleport(dst, TeleportCause.PLUGIN);
-			player.setFallDistance(0F);
-		}
-	}
+            dst = toLocation;
+            block.getWorld().getNearbyEntities(block.getLocation(), 1D, 1D, 1D).stream()
+                    .filter(e -> !e.isDead() && e instanceof Player)
+                    .forEach(e -> queue.offer((Player) e));
+        }
 
-	/* Callbacks */
-	@Override
-	public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType,
-                                       ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
-		return slot >= 1 && slot < 9;
-	}
+        while (dst != null && !queue.isEmpty()) {
+            Player player = queue.poll();
+            player.teleport(dst, TeleportCause.PLUGIN);
+            player.setFallDistance(0F);
+        }
+    }
 
-	@Override
-	public int getRealSlots() {
-		return 1;
-	}
+    /* Callbacks */
+    @Override
+    public boolean onInventoryInteract(ClickType clickType, InventoryAction action, SlotType slotType, ItemStack clicked, ItemStack cursor, int slot, InventoryView view, HumanEntity player) {
+        return slot >= 1 && slot < 9;
+    }
+
+    @Override
+    public int getRealSlots() {
+        return 1;
+    }
 
 }

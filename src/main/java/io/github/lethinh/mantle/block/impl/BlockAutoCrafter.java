@@ -1,8 +1,9 @@
 package io.github.lethinh.mantle.block.impl;
 
 import io.github.lethinh.mantle.Mantle;
-import io.github.lethinh.mantle.block.BlockMachine;
+import io.github.lethinh.mantle.block.BlockMachineEnergized;
 import io.github.lethinh.mantle.block.GenericMachine;
+import io.github.lethinh.mantle.energy.EnergyCapacitor;
 import io.github.lethinh.mantle.utils.ItemStackFactory;
 import io.github.lethinh.mantle.utils.Utils;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +22,7 @@ import java.util.stream.IntStream;
 /**
  * Created by Le Thinh
  */
-public class BlockAutoCrafter extends BlockMachine {
+public class BlockAutoCrafter extends BlockMachineEnergized {
 
     private static final short PLAN_INPUT_SLOT = 0;
     private static final short RESULT_SLOT = 9;
@@ -39,6 +40,8 @@ public class BlockAutoCrafter extends BlockMachine {
         for (int i = RESULT_SLOT + 1; i < INGREDIENTS_START_SLOT; ++i) {
             inventory.setItem(i, new ItemStack(Material.STAINED_GLASS_PANE));
         }
+
+        setEnergyCapacitor(new EnergyCapacitor(DEFAULT_ENERGY_CAPACITY, 200, 0));
     }
 
     @Override
